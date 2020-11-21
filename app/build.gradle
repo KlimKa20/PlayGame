@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 apply from: '../git.gradle'
+apply plugin: 'com.google.gms.google-services'
 def versionArray = getArray()
 
 android {
@@ -9,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "by.bsuir.playgame"
-        minSdkVersion 26
+        minSdkVersion 25
         targetSdkVersion 30
         versionCode generateVersionCode(versionArray)
         versionName "${versionArray[0]}.${versionArray[1]}.${versionArray[2]}"
@@ -33,6 +34,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.google.firebase:firebase-database:19.5.1'
+    implementation 'com.google.firebase:firebase-auth:20.0.1'
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
