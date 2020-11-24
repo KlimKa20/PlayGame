@@ -3,6 +3,7 @@ package by.bsuir.playgame;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class RoomActivity extends AppCompatActivity {
+
 
     Button button;
 
@@ -32,6 +34,7 @@ public class RoomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
 
+
         Intent postIntent = getIntent();
         playerName =postIntent.getStringExtra("playerName");
         roomName =postIntent.getStringExtra("roomName");
@@ -42,7 +45,22 @@ public class RoomActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("rooms/" + roomName).child("p1");
 
-        ValueEventListener eventListener = new ValueEventListener() {
+
+        database.getReference("rooms/" + roomName).child("name").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        getSupportActionBar().hide();
+//                        getSupportActionBar().setTitle(dataSnapshot.getValue().toString());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue().toString().equals(playerName)){
@@ -63,8 +81,7 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
-        };
-        myRef.addListenerForSingleValueEvent(eventListener);
+        });
 
 
         button.setOnClickListener(v -> {
