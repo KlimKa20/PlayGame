@@ -9,17 +9,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PlayGame">
-        <activity android:name=".UserPageActivity"></activity>
-        <activity android:name=".RoomActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".PlacementRoomActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" />
+        <activity android:name=".UserPageActivity" />
+        <activity
+            android:name=".RoomActivity"
+            android:screenOrientation="landscape" />
+        <activity android:name=".MainActivity">
 
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
+        </activity>
+        <activity android:name=".SignUpActivity" />
         <activity android:name=".DashboardActivity" />
     </application>
 

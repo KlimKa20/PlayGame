@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -20,7 +21,7 @@ public class RoomActivity extends AppCompatActivity {
 
 
     Button button;
-
+    View fieldFragment;
     String playerName = "";
     String roomName ;
     String role = "";
@@ -38,6 +39,8 @@ public class RoomActivity extends AppCompatActivity {
         Intent postIntent = getIntent();
         playerName =postIntent.getStringExtra("playerName");
         roomName =postIntent.getStringExtra("roomName");
+        fieldFragment = findViewById(R.id.fragment1);
+        fieldFragment.setVisibility(View.INVISIBLE);
 
         button = findViewById(R.id.click);
         button.setEnabled(false);
