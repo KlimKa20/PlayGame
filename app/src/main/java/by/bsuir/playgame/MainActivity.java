@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 DatabaseReference myRef  = database.getReference("activeUsers/"+password);
                 myRef.setValue(email);
                 Toast.makeText(MainActivity.this, "Successfully Login", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, DashboardActivity.class).putExtra("playerEmail",email);
+                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
                 startActivity(intent);
                 finish();
             } else {

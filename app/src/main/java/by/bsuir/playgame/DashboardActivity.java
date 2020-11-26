@@ -1,11 +1,9 @@
 package by.bsuir.playgame;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,23 +21,22 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class DashboardActivity extends AppCompatActivity {
     private Button logout, create, connect;
+    private FirebaseAuth firebaseAuth;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
-    private String playerName;
     private EditText textView;
-    private String roomName,key;
+    private String roomName, key;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dashboard);
 
-        Intent postIntent = getIntent();
-        playerName = postIntent.getStringExtra("playerEmail");
-
+        firebaseAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         logout = findViewById(R.id.logout);
         textView = findViewById(R.id.room);
@@ -58,42 +55,43 @@ public class DashboardActivity extends AppCompatActivity {
             myRef = database.getReference().child("rooms");
             Map<String, Object> values = new HashMap<>();
             values.put("name", roomName);
-            values.put("p1", playerName);
             Map<String, Object> childUpdates = new HashMap<>();
             childUpdates.put("/rooms/" + key, values);
+            database.getReference().updateChildren(childUpdates);
+            values = new HashMap<>();
+            values.put("user", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+            childUpdates = new HashMap<>();
+            childUpdates.put("/rooms/" + key + "/p1", values);
             database.getReference().updateChildren(childUpdates);
             moveToRoom();
 
         });
 
         connect.setOnClickListener(v -> {
-            roomName = textView.getText().toString();
-            myRef  = database.getReference("rooms/").child(roomName);
+            key = textView.getText().toString();
+            myRef = database.getReference("rooms/").child(key);
             myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        myRef = myRef.child("/p2");
-                        myRef.setValue(playerName);
+                        myRef = myRef.child("/p2").child("user");
+                        myRef.setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
                         moveToRoom();
-                    }
-                    else
-                    {
-                        Toast.makeText(DashboardActivity.this,"Room doesn't exist",Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(DashboardActivity.this, "Room doesn't exist", Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onCancelled(@NonNull DatabaseError databaseError) {
                 }
             });
         });
     }
 
-    public void moveToRoom(){
-        Intent intent = new Intent(DashboardActivity.this, RoomActivity.class);
-        intent.putExtra("roomName", roomName);
-        intent.putExtra("playerName", playerName);
+    public void moveToRoom() {
+        Intent intent = new Intent(DashboardActivity.this, PlacementRoomActivity.class);
+        intent.putExtra("roomName", key);
         startActivity(intent);
     }
 
@@ -107,24 +105,5 @@ public class DashboardActivity extends AppCompatActivity {
         Intent intent = new Intent(this, UserPageActivity.class);
         startActivity(intent);
         return super.onOptionsItemSelected(item);
-    }
-
-
-    private void addRoomEventListener() {
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Intent intent = new Intent(DashboardActivity.this, RoomActivity.class);
-                intent.putExtra("roomName", key);
-                intent.putExtra("playerName", playerName);
-                startActivity(intent);
-                finish();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }

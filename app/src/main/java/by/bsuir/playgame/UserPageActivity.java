@@ -17,6 +17,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
+
 public class UserPageActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
@@ -34,7 +36,7 @@ public class UserPageActivity extends AppCompatActivity {
         editText = findViewById(R.id.NameUser);
         button = findViewById(R.id.ApplyName);
 
-        myRef = database.getReference("Users").child(firebaseAuth.getCurrentUser().getUid()).child("userName");
+        myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).child("userName");
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

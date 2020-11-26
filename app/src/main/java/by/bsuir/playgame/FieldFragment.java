@@ -11,6 +11,12 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -20,6 +26,12 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     RecyclerView recyclerView;
     GridLayoutManager layoutManager;
     ShipViewModel shipViewModel;
+    //
+    private FirebaseAuth firebaseAuth;
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
+
+//
 
     private String nameList[] = new String[100];
     private int iconId[] = new int[100];
@@ -27,8 +39,26 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//
+        firebaseAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
+//
         shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(ShipViewModel.class);
         shipViewModel.getPoint().observe(Objects.requireNonNull(requireActivity()), s -> SetShip(s));
+        shipViewModel.getfillDB().observe(Objects.requireNonNull(requireActivity()), s -> {
+            Map<String, Object> values = new HashMap<>();
+            for (int i = 0; i < iconId.length; i++)
+                if (iconId[i] == R.drawable._) {
+                    values.put(String.valueOf(i), 0);
+
+                } else {
+                    values.put(String.valueOf(i), 1);
+
+                }
+            Map<String, Object> childUpdates = new HashMap<>();
+            childUpdates.put(s, values);
+            database.getReference().updateChildren(childUpdates);
+        });
     }
 
     @Override
@@ -57,7 +87,7 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     public void SetShip(String value) {
         if (value.length() == 5) {
             if (!check(Integer.parseInt(value.substring(0, 2))) || !check(Integer.parseInt(value.substring(2, 4)))) {
-                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "Нельзя расположить корабль", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (value.charAt(0) == value.charAt(2) && Math.abs(value.charAt(1) - value.charAt(3)) == value.charAt(4) - '0' - 1) {
@@ -70,19 +100,21 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
                     iconId[i * 10 + (value.charAt(1) - '0')] = R.drawable.ic_launcher_background;
                 }
             } else {
-                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "Нельзя расположить корабль", Toast.LENGTH_SHORT).show();
                 return;
             }
+            shipViewModel.setResultOfSetShip(value.charAt(value.length() - 1) - '0');
         } else if (value.length() == 4) {
-            deleteShip(Integer.parseInt(value.substring(0, 2)));
+            int size = deleteShip(Integer.parseInt(value.substring(0, 2)));
+            shipViewModel.setResultOfSetShip(size * -1);
         } else {
             if (!check(Integer.parseInt(value.substring(0, 2)))) {
-                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "Нельзя расположить корабль", Toast.LENGTH_SHORT).show();
                 return;
             }
             iconId[(value.charAt(0) - '0') * 10 + (value.charAt(1) - '0')] = R.drawable.ic_launcher_background;
+            shipViewModel.setResultOfSetShip(value.charAt(value.length() - 1) - '0');
         }
-        shipViewModel.setResultOfSetShip(value.charAt(value.length() - 1) - '0');
         FieldAdapter fieldAdapter = new FieldAdapter(getContext(), iconId, nameList, this);
         recyclerView.setAdapter(fieldAdapter);
     }
@@ -111,7 +143,7 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
             if (position > 9 && fullField == iconId[position - 10])
                 return sizeship + deleteShip(position - 10);
         }
-        return fullField;
+        return sizeship;
     }
 
     public boolean check(int position) {
