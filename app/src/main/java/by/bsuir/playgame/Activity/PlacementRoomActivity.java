@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -18,21 +18,27 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import by.bsuir.playgame.R;
+import by.bsuir.playgame.ViewModel.ShipViewModel;
 
 public class PlacementRoomActivity extends AppCompatActivity {
 
     ShipViewModel shipViewModel;
     Button button5, button4, button3, button2, button1, buttlebutton;
     TextView textView4, textView3, textView2, textView1;
-    String roomName ;
+    String roomName;
     String role = "";
     String message = "";
+    String connectionString;
 
     private ProgressDialog progressDialog;
     private FirebaseDatabase database;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference messageRef,myRef;
+    private DatabaseReference messageRef, myRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,22 +47,22 @@ public class PlacementRoomActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
 
         Intent postIntent = getIntent();
-        roomName =postIntent.getStringExtra("roomName");
+        roomName = postIntent.getStringExtra("roomName");
         progressDialog = new ProgressDialog(this);
         firebaseAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("rooms/" + roomName).child("p1").child("user");
-
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue().toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())){
+                if (dataSnapshot.getValue().toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
+                    connectionString = "/rooms/" + roomName + "/p1" + "/Field";
                     role = "host";
-                    progressDialog.setMessage("Please wait second player\n ID room: "+roomName);
+                    progressDialog.setMessage("Please wait second player\n ID room: " + roomName);
                     progressDialog.show();
                     progressDialog.setCanceledOnTouchOutside(false);
-                }
-                else {
+                } else {
+                    connectionString = "/rooms/" + roomName + "/p2" + "/Field";
                     role = "guest";
                 }
                 messageRef = database.getReference("rooms/" + roomName + "/message");
@@ -69,7 +75,6 @@ public class PlacementRoomActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
 
 
         shipViewModel = ViewModelProviders.of(this).get(ShipViewModel.class);
@@ -86,42 +91,38 @@ public class PlacementRoomActivity extends AppCompatActivity {
         button1.setOnClickListener(item -> {
             if (Integer.parseInt(textView1.getText().toString()) > 0)
                 shipViewModel.setShip("1");
+            else
+                Toast.makeText(this, "Выберите другой тип корабля", Toast.LENGTH_SHORT).show();
+
         });
         button2.setOnClickListener(item -> {
             if (Integer.parseInt(textView2.getText().toString()) > 0)
                 shipViewModel.setShip("2");
+            else
+                Toast.makeText(this, "Выберите другой тип корабля", Toast.LENGTH_SHORT).show();
+
         });
         button3.setOnClickListener(item -> {
             if (Integer.parseInt(textView3.getText().toString()) > 0)
                 shipViewModel.setShip("3");
+            else
+                Toast.makeText(this, "Выберите другой тип корабля", Toast.LENGTH_SHORT).show();
+
         });
         button4.setOnClickListener(item -> {
             if (Integer.parseInt(textView4.getText().toString()) > 0)
                 shipViewModel.setShip("4");
+            else
+                Toast.makeText(this, "Выберите другой тип корабля", Toast.LENGTH_SHORT).show();
+
         });
 
-        buttlebutton.setOnClickListener(item-> {
+        buttlebutton.setOnClickListener(item -> {
             if (Integer.parseInt(textView1.getText().toString()) +
                     Integer.parseInt(textView2.getText().toString()) +
                     Integer.parseInt(textView3.getText().toString()) +
                     Integer.parseInt(textView4.getText().toString()) == 0) {
-                myRef  = database.getReference("rooms/").child(roomName).child("p1").child("user");
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid() )) {
-                            shipViewModel.fillDB("/rooms/" + roomName + "/p1/" + Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid() + "/Field");
-                        }
-                        else
-                        {
-                            shipViewModel.fillDB("/rooms/" + roomName + "/p2/" + Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid() + "/Field");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+                Toast.makeText(this, "В бой!", Toast.LENGTH_SHORT).show();
 
             } else {
                 Toast.makeText(this, "Раставленны не все корабли", Toast.LENGTH_SHORT).show();
@@ -139,11 +140,30 @@ public class PlacementRoomActivity extends AppCompatActivity {
                 Toast.makeText(this, "На поле нет кораблей", Toast.LENGTH_SHORT).show();
             }
         });
+        shipViewModel.getError().observe(this, s -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
+
+        shipViewModel.getIcon().observe(this, s -> {
+            if(connectionString != null){
+                Map<String, Object> values = new HashMap<>();
+                for (int i = 0; i < s.length; i++)
+                    if (s[i] == R.drawable._) {
+                        values.put(String.valueOf(i), 0);
+
+                    } else {
+                        values.put(String.valueOf(i), 1);
+
+                    }
+                Map<String, Object> childUpdates = new HashMap<>();
+                childUpdates.put(connectionString, values);
+                database.getReference().updateChildren(childUpdates);
+            }
+        });
+
         shipViewModel.getResultOfSetShip().observe(this, s -> {
             int sign = -1;
             if (s < 0) {
                 sign = 1;
-                s*=-1;
+                s *= -1;
             }
             switch (s) {
                 case 1:
@@ -162,12 +182,13 @@ public class PlacementRoomActivity extends AppCompatActivity {
         });
 
     }
+
     private void addRoomEventListener() {
         messageRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(role.equals("host")){
-                    if(Objects.requireNonNull(snapshot.getValue(String.class)).contains("guest:")){
+                if (role.equals("host")) {
+                    if (Objects.requireNonNull(snapshot.getValue(String.class)).contains("guest:")) {
                         progressDialog.dismiss();
 
                     }

@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="by.bsuir.playgame.FieldFragment"
+        android:name="by.bsuir.playgame.Fragment.FieldFragment"
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_alignParentStart="true"

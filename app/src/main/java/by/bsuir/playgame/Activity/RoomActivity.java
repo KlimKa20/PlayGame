@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -18,6 +18,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
+
+import by.bsuir.playgame.R;
 
 public class RoomActivity extends AppCompatActivity {
 

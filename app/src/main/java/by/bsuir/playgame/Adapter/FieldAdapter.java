@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import by.bsuir.playgame.R;
 
 public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.MyHolder> {
 
@@ -60,6 +62,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.MyHolder> {
             itemView.setOnClickListener(this);
             img = itemView.findViewById(R.id.imageView);
             txt = itemView.findViewById(R.id.textView);
+            txt.setVisibility(View.INVISIBLE);
         }
 
         @Override

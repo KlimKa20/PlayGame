@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import by.bsuir.playgame.R;
 
 public class MainActivity extends AppCompatActivity {
 

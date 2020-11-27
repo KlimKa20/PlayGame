@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import by.bsuir.playgame.R;
 
 public class DashboardActivity extends AppCompatActivity {
     private Button logout, create, connect;
@@ -92,6 +94,7 @@ public class DashboardActivity extends AppCompatActivity {
     public void moveToRoom() {
         Intent intent = new Intent(DashboardActivity.this, PlacementRoomActivity.class);
         intent.putExtra("roomName", key);
+        intent.putExtra("ViewModel", "Placement");
         startActivity(intent);
     }
 
