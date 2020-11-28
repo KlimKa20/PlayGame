@@ -54,25 +54,24 @@ public class PlacementRoomActivity extends AppCompatActivity {
         myRef = database.getReference("rooms/" + roomName).child("p1").child("user");
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue().toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
                     connectionString = "/rooms/" + roomName + "/p1" + "/Field";
-                    role = "host";
                     progressDialog.setMessage("Please wait second player\n ID room: " + roomName);
                     progressDialog.show();
+                    message = "Waiting second player";
                     progressDialog.setCanceledOnTouchOutside(false);
                 } else {
+                    message = "Placement Start";
                     connectionString = "/rooms/" + roomName + "/p2" + "/Field";
-                    role = "guest";
                 }
                 messageRef = database.getReference("rooms/" + roomName + "/message");
-                message = role + ":Пуньк";
                 messageRef.setValue(message);
                 addRoomEventListener();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
 
@@ -124,6 +123,25 @@ public class PlacementRoomActivity extends AppCompatActivity {
                     Integer.parseInt(textView4.getText().toString()) == 0) {
                 Toast.makeText(this, "В бой!", Toast.LENGTH_SHORT).show();
 
+                messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals("Placement Start")) {
+                            progressDialog.setMessage("Please wait second player");
+                            progressDialog.show();
+                            progressDialog.setCanceledOnTouchOutside(false);
+                            message = "Waiting second player";
+                        } else {
+                            message = "Start Game";
+                        }
+                        messageRef.setValue(message);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             } else {
                 Toast.makeText(this, "Раставленны не все корабли", Toast.LENGTH_SHORT).show();
             }
@@ -143,7 +161,7 @@ public class PlacementRoomActivity extends AppCompatActivity {
         shipViewModel.getError().observe(this, s -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
 
         shipViewModel.getIcon().observe(this, s -> {
-            if(connectionString != null){
+            if (connectionString != null) {
                 Map<String, Object> values = new HashMap<>();
                 for (int i = 0; i < s.length; i++)
                     if (s[i] == R.drawable._) {
@@ -187,11 +205,15 @@ public class PlacementRoomActivity extends AppCompatActivity {
         messageRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (role.equals("host")) {
-                    if (Objects.requireNonNull(snapshot.getValue(String.class)).contains("guest:")) {
-                        progressDialog.dismiss();
-
-                    }
+                if (Objects.requireNonNull(snapshot.getValue(String.class)).equals("Placement Start")) {
+                    progressDialog.dismiss();
+                }
+                else if (Objects.requireNonNull(snapshot.getValue(String.class)).equals("Start Game")) {
+                    progressDialog.dismiss();
+                    Intent intent = new Intent(PlacementRoomActivity.this, RoomActivity.class);
+                    intent.putExtra("roomName", roomName);
+                    intent.putExtra("ViewModel", "ButtleView");
+                    startActivity(intent);
                 }
             }
 

@@ -16,7 +16,6 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
     private final MutableLiveData<String> countPoint = new MutableLiveData<>();
     private final MutableLiveData<String> Points = new MutableLiveData<>();
     private final MutableLiveData<Integer> resultOfSetting = new MutableLiveData<>();
-    private final MutableLiveData<String> fill = new MutableLiveData<>();
     private final MutableLiveData<int[]> iconId = new MutableLiveData<>();
     private final MutableLiveData<String> error = new MutableLiveData<>();
 

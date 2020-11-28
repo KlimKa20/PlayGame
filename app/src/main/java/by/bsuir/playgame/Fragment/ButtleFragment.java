@@ -20,8 +20,7 @@ import by.bsuir.playgame.ViewModel.ButtleViewModel;
 import by.bsuir.playgame.ViewModel.DisplayViewModel;
 import by.bsuir.playgame.ViewModel.ShipViewModel;
 
-
-public class FieldFragment extends Fragment implements FieldAdapter.ItemListener {
+public class ButtleFragment extends Fragment implements FieldAdapter.ItemListener{
 
 
     RecyclerView recyclerView;
@@ -34,12 +33,7 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
-        if (intent.getStringExtra("ViewModel").equals("Placement")) {
-            shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(ShipViewModel.class);
-        } else {
-            shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(DisplayViewModel.class);
-        }
+        shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(ButtleViewModel.class);
 
         shipViewModel.getIcon().observe(Objects.requireNonNull(requireActivity()), s -> {
             FieldAdapter fieldAdapter = new FieldAdapter(getContext(), s, nameList, this);
@@ -51,9 +45,9 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View viewHierarchy = inflater.inflate(R.layout.fragment_field, container, false);
+        View viewHierarchy = inflater.inflate(R.layout.buttle_field, container, false);
 
-        recyclerView = viewHierarchy.findViewById(R.id.recyclerView);
+        recyclerView = viewHierarchy.findViewById(R.id.recyclerView1);
         layoutManager = new GridLayoutManager(getContext(), 10);
         recyclerView.setLayoutManager(layoutManager);
         for (int i = 0; i < 10; i++)
@@ -68,5 +62,4 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     public void onItemClick(String idField) {
         shipViewModel.setPoint(idField);
     }
-
 }
