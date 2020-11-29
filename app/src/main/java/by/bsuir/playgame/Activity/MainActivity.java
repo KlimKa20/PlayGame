@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import by.bsuir.playgame.R;
@@ -25,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,13 +62,11 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
-                DatabaseReference myRef  = database.getReference("activeUsers/"+password);
-                myRef.setValue(email);
                 Toast.makeText(MainActivity.this, "Successfully Login", Toast.LENGTH_LONG).show();
-//                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
-                Intent intent = new Intent(MainActivity.this, RoomActivity.class);
-                intent.putExtra("roomName","-MN7uyJtGzE0_p_akXUG");
-                intent.putExtra("ViewModel", "Placement1");
+                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+//                Intent intent = new Intent(MainActivity.this, RoomActivity.class);
+//                intent.putExtra("roomName","-MN7uyJtGzE0_p_akXUG");
+//                intent.putExtra("ViewModel", "Placement1");
                 startActivity(intent);
 //                finish();
             } else {

@@ -43,8 +43,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             checkDestroy(position);
         } else if (type == 3) {
             Objects.requireNonNull(temp)[position] = R.drawable.square_png91;
-        }
-        else if (type == 4){
+        } else if (type == 4) {
             Objects.requireNonNull(temp)[position] = R.drawable.square_png97;
         }
         iconId.setValue(temp);
@@ -224,7 +223,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
 
     }
 
-    public LiveData<Map<String, Object>> getDestoy(){
+    public LiveData<Map<String, Object>> getDestoy() {
         return destroy;
     }
 
@@ -232,6 +231,12 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
         for (int i = 0; i < temp.length; i++) {
             if (temp[i] == 0) {
                 temp[i] = R.drawable._;
+            } else if (temp[i] == 2) {
+                temp[i] = R.drawable.common_google_signin_btn_icon_dark;
+            } else if (temp[i] == 3) {
+                temp[i] = R.drawable.square_png91;
+            } else if (temp[i] == 4) {
+                temp[i] = R.drawable.square_png97;
             } else {
                 temp[i] = R.drawable.ic_launcher_background;
             }

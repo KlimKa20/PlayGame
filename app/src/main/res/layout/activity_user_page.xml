@@ -23,4 +23,23 @@
         android:layout_height="wrap_content"
         android:text="Button" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse image to upload"
+        android:onClick="btnBrowse_Click"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"/>
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Image"
+        android:onClick="btnUpload_Click"/>
+
 </LinearLayout>
