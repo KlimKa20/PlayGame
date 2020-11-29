@@ -23,7 +23,28 @@
         android:layout_height="wrap_content"
         android:text="Button" />
 
+    <RadioGroup
+        android:id="@+id/RadioButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/GravatarButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gravatar"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton
+            android:id="@+id/FireBaseButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FireStore"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
+
     <Button
+        android:id="@+id/ChooseImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Browse image to upload"
@@ -37,6 +58,7 @@
 
 
     <Button
+        android:id="@+id/UpdateImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Upload Image"

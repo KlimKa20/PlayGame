@@ -89,6 +89,7 @@ public class SignUpActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     DatabaseReference myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
                     Map<String, Object> values = new HashMap<>();
+                    values.put("Gravatar", false);
                     values.put("userName", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
                     values.put("Image", "https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
                     myRef.updateChildren(values);

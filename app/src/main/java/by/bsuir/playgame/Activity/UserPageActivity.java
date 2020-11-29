@@ -12,13 +12,13 @@ import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -29,8 +29,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +49,9 @@ public class UserPageActivity extends AppCompatActivity {
     private DatabaseReference myRef;
     private StorageReference reference;
     private Uri imgUri;
+    private ProgressDialog progressDialog;
+    private boolean gravatar = false;
+    private String image;
 
     ImageView imageView;
     Button button;
@@ -67,6 +74,11 @@ public class UserPageActivity extends AppCompatActivity {
         button = findViewById(R.id.ApplyName);
         imageView = findViewById(R.id.imageView);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
+        progressDialog.setCanceledOnTouchOutside(false);
+
         reference = firebaseStorage.getReference();
         myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
 
@@ -74,12 +86,33 @@ public class UserPageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    if (Objects.equals(child.getKey(), "userName")) {
+                    if (Objects.equals(child.getKey(), "Gravatar")) {
+                        if (Boolean.parseBoolean(child.getValue().toString())) {
+                            gravatar = true;
+                            ((RadioButton) findViewById(R.id.GravatarButton)).setChecked(true);
+                            findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
+                            findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
+                        } else {
+                            ((RadioButton) findViewById(R.id.FireBaseButton)).setChecked(true);
+                            findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
+                            findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
+                        }
+                    } else if (Objects.equals(child.getKey(), "userName")) {
                         editText.setHint(Objects.requireNonNull(child.getValue()).toString());
                     } else {
-                        Glide.with(getApplicationContext())
-                                .load(Objects.requireNonNull(child.getValue()).toString())
-                                .into(imageView);
+                        image = child.getValue().toString();
+                        if (gravatar) {
+                            String hash = md5(Objects.requireNonNull(firebaseAuth.getCurrentUser().getEmail()));
+                            String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
+                            Picasso.with(getApplicationContext())
+                                    .load(gravatarUrl)
+                                    .into(imageView);
+                        } else {
+                            Picasso.with(getApplicationContext())
+                                    .load(image)
+                                    .into(imageView);
+                        }
+                        progressDialog.dismiss();
                     }
                 }
             }
@@ -143,6 +176,19 @@ public class UserPageActivity extends AppCompatActivity {
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
+    private String md5(String in) {
+        String result = null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.reset();
+            digest.update(in.getBytes());
+            BigInteger bigInt = new BigInteger(1, digest.digest());
+            result = bigInt.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     public void btnUpload_Click(View v) {
@@ -152,9 +198,7 @@ public class UserPageActivity extends AppCompatActivity {
             dialog.show();
 
             StorageReference ref = reference.child(STORAGE_PATH + System.currentTimeMillis() + "." + getImageExt(imgUri));
-
             ref.putFile(imgUri).addOnSuccessListener(taskSnapshot -> {
-
                 dialog.dismiss();
                 Toast.makeText(getApplicationContext(), "Image uploaded", Toast.LENGTH_SHORT).show();
                 Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -177,7 +221,36 @@ public class UserPageActivity extends AppCompatActivity {
                     });
         } else {
             Toast.makeText(getApplicationContext(), "Please select image", Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    public void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+
+        switch (view.getId()) {
+            case R.id.GravatarButton:
+                if (checked) {
+                    findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
+                    String hash = md5(Objects.requireNonNull(firebaseAuth.getCurrentUser().getEmail()));
+                    String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
+                    Picasso.with(getApplicationContext())
+                            .load(gravatarUrl)
+                            .into(imageView);
+                    myRef.child("Gravatar").setValue(true);
+                }
+                break;
+            case R.id.FireBaseButton:
+                if (checked) {
+                    findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
+                    findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
+                    Picasso.with(getApplicationContext())
+                            .load(image)
+                            .into(imageView);
+                    myRef.child("Gravatar").setValue(false);
+
+                }
+                break;
         }
     }
 }
