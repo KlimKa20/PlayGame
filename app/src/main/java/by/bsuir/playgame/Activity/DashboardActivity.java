@@ -62,11 +62,11 @@ public class DashboardActivity extends AppCompatActivity {
             database.getReference().updateChildren(childUpdates);
             values = new HashMap<>();
             values.put("user", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+            values.put("ship", 10);
             childUpdates = new HashMap<>();
             childUpdates.put("/rooms/" + key + "/p1", values);
             database.getReference().updateChildren(childUpdates);
             moveToRoom();
-
         });
 
         connect.setOnClickListener(v -> {
@@ -76,8 +76,8 @@ public class DashboardActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        myRef = myRef.child("/p2").child("user");
-                        myRef.setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+                        myRef.child("/p2").child("user").setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+                        myRef.child("/p2").child("ship").setValue(10);
                         moveToRoom();
                     } else {
                         Toast.makeText(DashboardActivity.this, "Room doesn't exist", Toast.LENGTH_LONG).show();
@@ -100,12 +100,23 @@ public class DashboardActivity extends AppCompatActivity {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 0, "UserPage");
+        menu.add(0, 2, 0, "UserStatistic");
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Intent intent = new Intent(this, UserPageActivity.class);
+        Intent intent;
+        switch (item.getItemId()){
+            case 1:
+                intent = new Intent(this, UserPageActivity.class);
+                break;
+            case 2:
+                intent = new Intent(this, StatisticActivity.class);
+                break;
+            default:
+                intent = null;
+        }
         startActivity(intent);
         return super.onOptionsItemSelected(item);
     }

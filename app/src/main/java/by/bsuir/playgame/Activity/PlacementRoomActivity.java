@@ -214,6 +214,7 @@ public class PlacementRoomActivity extends AppCompatActivity {
                     intent.putExtra("roomName", roomName);
                     intent.putExtra("ViewModel", "ButtleView");
                     startActivity(intent);
+                    finish();
                 }
             }
 

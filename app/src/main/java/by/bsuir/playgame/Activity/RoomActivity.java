@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,8 +38,9 @@ public class RoomActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private FirebaseDatabase database;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference messageRef, myRef, displayRef, buttleRef;
+    private DatabaseReference messageRef, myRef, displayRef, buttleRef, restRef, staticticRef;
 
+    int RestShip;
     boolean available = false;
 
     @Override
@@ -69,9 +71,13 @@ public class RoomActivity extends AppCompatActivity {
                     role = "host";
                     displayRef = database.getReference("rooms/" + roomName).child("p1").child("Field");
                     buttleRef = database.getReference("rooms/" + roomName).child("p2").child("Field");
+                    restRef = database.getReference("rooms/" + roomName).child("p1").child("ship");
+                    staticticRef = database.getReference("statistic/" + roomName).child("p1");
                 } else {
                     displayRef = database.getReference("rooms/" + roomName).child("p2").child("Field");
                     buttleRef = database.getReference("rooms/" + roomName).child("p1").child("Field");
+                    restRef = database.getReference("rooms/" + roomName).child("p2").child("ship");
+                    staticticRef = database.getReference("statistic/" + roomName).child("p2");
                     role = "guest";
                 }
                 messageRef = database.getReference("rooms/" + roomName + "/message");
@@ -80,8 +86,9 @@ public class RoomActivity extends AppCompatActivity {
                 addButtleEventListener();
                 addDisplayEventListener();
                 addRoomEventListener();
+                addListenerOfFinish();
+                addWriterNameOfRoom();
                 textView.setText("Ход противника");
-
             }
 
             @Override
@@ -89,15 +96,20 @@ public class RoomActivity extends AppCompatActivity {
             }
         });
 
+
         buttleViewModel.getShutElement().observe(this, s -> {
-            if (available){
+            if (available) {
                 buttleRef.child(String.valueOf(Integer.parseInt(s))).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue().toString().equals("0")) {
+                        if (Objects.requireNonNull(snapshot.getValue()).toString().equals("0")) {
                             buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(3);
-                        } else {
+                        } else if (snapshot.getValue().toString().equals("1")) {
                             buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(2);
+                        } else {
+                            Toast.makeText(RoomActivity.this, "Выберите другую клеточку", Toast.LENGTH_LONG).show();
+                            messageRef.setValue(role);
+                            return;
                         }
                         messageRef.setValue(role);
                     }
@@ -111,9 +123,56 @@ public class RoomActivity extends AppCompatActivity {
                 textView.setText("Ход противника");
             }
         });
-        displayViewModel.getDestoy().observe(this, stringObjectMap -> displayRef.updateChildren(stringObjectMap));
+        displayViewModel.getDestoy().observe(this, stringObjectMap -> {
+            displayRef.updateChildren(stringObjectMap);
+            restRef.setValue(--RestShip);
+        });
     }
 
+    private void addWriterNameOfRoom() {
+        database.getReference("rooms/" + roomName + "/name").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                database.getReference("statistic/" + roomName + "/name").setValue(Objects.requireNonNull(snapshot.getValue()).toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void addListenerOfFinish() {
+        restRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                RestShip = Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        restRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == 0) {
+                    messageRef.setValue("Finish" + role);
+                    available = false;
+                    textView.setText("Вы проиграли");
+                    createStatistic(0);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 
 
     private void readDisplayEventListener() {
@@ -173,7 +232,6 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 buttleViewModel.setIconId(Integer.parseInt(Objects.requireNonNull(snapshot.getKey())), Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()));
-
             }
 
             @Override
@@ -198,16 +256,24 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (role.equals("host")) {
-                    if (snapshot.getValue(String.class).equals("guest")) {
+                    if (Objects.equals(snapshot.getValue(String.class), "guest")) {
                         available = true;
                         textView.setText("Ваш Ход");
-
+                    } else if (Objects.equals(snapshot.getValue(String.class), "Finishguest")) {
+                        Toast.makeText(RoomActivity.this, "Победа", Toast.LENGTH_LONG).show();
+                        available = false;
+                        textView.setText("Вы выиграли");
+                        createStatistic(RestShip);
                     }
                 } else {
-                    if (snapshot.getValue(String.class).equals("host")) {
+                    if (Objects.equals(snapshot.getValue(String.class), "host")) {
                         available = true;
                         textView.setText("Ваш Ход");
-
+                    } else if (Objects.equals(snapshot.getValue(String.class), "Finishhost")) {
+                        Toast.makeText(RoomActivity.this, "Победа", Toast.LENGTH_LONG).show();
+                        available = false;
+                        textView.setText("Вы выиграли");
+                        createStatistic(RestShip);
                     }
                 }
             }
@@ -217,6 +283,22 @@ public class RoomActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void createStatistic(int count) {
+        database.getReference("Users/" + Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).child("userName").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                staticticRef.child("name").setValue(Objects.requireNonNull(snapshot.getValue()).toString());
+                staticticRef.child("ship").setValue(count);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
 }
