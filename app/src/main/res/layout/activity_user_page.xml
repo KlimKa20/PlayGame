@@ -21,7 +21,7 @@
         android:id="@+id/ApplyName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="Update Name" />
 
     <RadioGroup
         android:id="@+id/RadioButtons"

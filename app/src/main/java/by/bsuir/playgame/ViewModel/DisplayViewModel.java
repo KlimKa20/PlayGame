@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.R;
+import by.bsuir.playgame.TypeField;
 
 public class DisplayViewModel extends AndroidViewModel implements IFieldViewModel {
 
@@ -26,7 +26,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = R.drawable._;
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
             }
         iconId.setValue(temperIconId);
     }
@@ -39,25 +39,25 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
     public void setIconId(int position, int type) {
         int[] temp = iconId.getValue();
         if (type == 2) {
-            Objects.requireNonNull(temp)[position] = R.drawable.common_google_signin_btn_icon_dark;
+            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCode();
             checkDestroy(position);
         } else if (type == 3) {
-            Objects.requireNonNull(temp)[position] = R.drawable.square_png91;
+            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCode();
         } else if (type == 4) {
-            Objects.requireNonNull(temp)[position] = R.drawable.square_png97;
+            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCode();
         }
         iconId.setValue(temp);
     }
 
     private void checkDestroy(int position) {
         int[] field = iconId.getValue();
-        ArrayList<Integer> temp = new ArrayList<Integer>();
+        ArrayList<Integer> temp = new ArrayList<>();
         temp.add(position);
         if (position % 10 == 0) {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCode()) {
                     temp.add(position + i);
-                } else if (field[position + i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position + i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -65,9 +65,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else if (position % 10 == 9) {
             for (int i = 1; i < 5; i++) {
-                if (field[position - i] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (Objects.requireNonNull(field)[position - i] == TypeField.HURT.getCode()) {
                     temp.add(position - i);
-                } else if (field[position - i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position - i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -75,9 +75,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCode()) {
                     temp.add(position + i);
-                } else if (field[position + i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position + i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -87,9 +87,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
             for (int i = 1; i < 5 - temp.size(); i++) {
-                if (field[position - i] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (field[position - i] == TypeField.HURT.getCode()) {
                     temp.add(position - i);
-                } else if (field[position - i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position - i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -100,14 +100,15 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
 
             }
         }
+
         if (temp.size() != 1) {
             Collections.sort(temp);
             destroyShip(temp, true);
         } else if (position < 10) {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (field[position + i * 10] == TypeField.HURT.getCode()) {
                     temp.add(position + i * 10);
-                } else if (field[position + i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position + i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -115,9 +116,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else if (position > 89) {
             for (int i = 1; i < 5; i++) {
-                if (field[position - i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (field[position - i * 10] == TypeField.HURT.getCode()) {
                     temp.add(position - i * 10);
-                } else if (field[position - i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position - i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -125,9 +126,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (field[position + i * 10] == TypeField.HURT.getCode()) {
                     temp.add(position + i * 10);
-                } else if (field[position + i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position + i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -137,9 +138,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
             for (int i = 1; i < 5 - temp.size(); i++) {
-                if (field[position - i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
+                if (field[position - i * 10] == TypeField.HURT.getCode()) {
                     temp.add(position - i * 10);
-                } else if (field[position - i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
+                } else if (field[position - i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
                     return;
                 } else {
                     break;
@@ -151,7 +152,6 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             Collections.sort(temp);
             destroyShip(temp, false);
         }
-
     }
 
 
@@ -218,9 +218,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
         }
-
         destroy.setValue(temp);
-
     }
 
     public LiveData<Map<String, Object>> getDestoy() {
@@ -230,15 +228,15 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
     public void setIcon(int[] temp) {
         for (int i = 0; i < temp.length; i++) {
             if (temp[i] == 0) {
-                temp[i] = R.drawable._;
+                temp[i] = TypeField.EMPTY.getCode();
             } else if (temp[i] == 2) {
-                temp[i] = R.drawable.common_google_signin_btn_icon_dark;
+                temp[i] = TypeField.HURT.getCode();
             } else if (temp[i] == 3) {
-                temp[i] = R.drawable.square_png91;
+                temp[i] = TypeField.LOSE.getCode();
             } else if (temp[i] == 4) {
-                temp[i] = R.drawable.square_png97;
+                temp[i] = TypeField.DESTROY.getCode();
             } else {
-                temp[i] = R.drawable.ic_launcher_background;
+                temp[i] = TypeField.SHIP.getCode();
             }
         }
         iconId.setValue(temp);

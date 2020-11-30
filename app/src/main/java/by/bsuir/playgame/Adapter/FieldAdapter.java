@@ -15,8 +15,8 @@ import by.bsuir.playgame.R;
 public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.MyHolder> {
 
     private Context context;
-    private int images[];
-    private String names[];
+    private final int[] images;
+    private final String[] names;
     protected ItemListener mListener;
 
     public FieldAdapter(Context context, int[] images, String[] names, ItemListener mListener) {
@@ -32,8 +32,7 @@ public class FieldAdapter extends RecyclerView.Adapter<FieldAdapter.MyHolder> {
 
         View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_layout,null);
 
-        MyHolder myHolder = new MyHolder(layout);
-        return myHolder;
+        return new MyHolder(layout);
     }
 
     @Override

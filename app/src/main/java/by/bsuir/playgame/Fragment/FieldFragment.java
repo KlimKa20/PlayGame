@@ -28,7 +28,7 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     GridLayoutManager layoutManager;
     IFieldViewModel shipViewModel;
 
-    protected String nameList[] = new String[100];
+    protected String[] nameList = new String[100];
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.R;
+import by.bsuir.playgame.TypeField;
 
 public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
     private final MutableLiveData<String> countPoint = new MutableLiveData<>();
@@ -27,7 +27,7 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = R.drawable._;
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
             }
         iconId.setValue(temperIconId);
     }
@@ -77,12 +77,11 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
             }
             if (value.charAt(0) == value.charAt(2) && Math.abs(value.charAt(1) - value.charAt(3)) == value.charAt(4) - '0' - 1) {
                 for (int i = Math.min(value.charAt(1), value.charAt(3)) - '0'; i <= Math.max(value.charAt(1), value.charAt(3)) - '0'; i++) {
-                    int ii = (value.charAt(0) - '0') * 10 + i;
-                    temperIconId[ii] = R.drawable.ic_launcher_background;
+                    Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + i] = TypeField.SHIP.getCode();
                 }
             } else if (value.charAt(1) == value.charAt(3) && Math.abs(value.charAt(0) - value.charAt(2)) == value.charAt(4) - '0' - 1) {
                 for (int i = Math.min(value.charAt(0), value.charAt(2)) - '0'; i <= Math.max(value.charAt(0), value.charAt(2)) - '0'; i++) {
-                    temperIconId[i * 10 + (value.charAt(1) - '0')] = R.drawable.ic_launcher_background;
+                    Objects.requireNonNull(temperIconId)[i * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCode();
                 }
             } else {
                 error.setValue("Нельзя расположить корабль");
@@ -97,7 +96,7 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
                 error.setValue("Нельзя расположить корабль");
                 return;
             }
-            temperIconId[(value.charAt(0) - '0') * 10 + (value.charAt(1) - '0')] = R.drawable.ic_launcher_background;
+            Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCode();
             resultOfSetting.setValue(value.charAt(value.length() - 1) - '0');
         }
         iconId.setValue(temperIconId);
@@ -106,8 +105,8 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
 
     public int deleteShip(int position) {
         int[] temperIconId = iconId.getValue();
-        int fullField = temperIconId[position];
-        temperIconId[position] = R.drawable._;
+        int fullField = Objects.requireNonNull(temperIconId)[position];
+        temperIconId[position] = TypeField.EMPTY.getCode();
         int sizeship = 1;
         if (position % 10 == 0 && fullField == temperIconId[position + 1]) {
             return sizeship + deleteShip(position + 1);
@@ -134,7 +133,7 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
 
     public boolean check(int position) {
         int[] temperIconId = iconId.getValue();
-        int emptyField = temperIconId[position];
+        int emptyField = Objects.requireNonNull(temperIconId)[position];
         int[] massCheck;
         if (position % 10 == 0) {
             massCheck = new int[]{

@@ -27,7 +27,7 @@ public class ButtleFragment extends Fragment implements FieldAdapter.ItemListene
     GridLayoutManager layoutManager;
     IFieldViewModel shipViewModel;
 
-    protected String nameList[] = new String[100];
+    protected String[] nameList = new String[100];
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

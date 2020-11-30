@@ -5,17 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -28,8 +22,6 @@ import by.bsuir.playgame.R;
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText emailEt, passwordEt1, passwordEt2;
-    private Button SignUpButton;
-    private TextView SignIntv;
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase database;
@@ -41,16 +33,14 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.signup);
         database = FirebaseDatabase.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
+        progressDialog = new ProgressDialog(this);
 
         emailEt = findViewById(R.id.Email);
         passwordEt1 = findViewById(R.id.Password1);
         passwordEt2 = findViewById(R.id.Password2);
-        SignUpButton = findViewById(R.id.register);
-        SignIntv = findViewById(R.id.signInTv);
 
-        progressDialog = new ProgressDialog(this);
-        SignUpButton.setOnClickListener(v -> Register());
-        SignIntv.setOnClickListener(v -> {
+        findViewById(R.id.register).setOnClickListener(v -> Register());
+        findViewById(R.id.signInTv).setOnClickListener(v -> {
             Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -83,26 +73,23 @@ public class SignUpActivity extends AppCompatActivity {
         progressDialog.setMessage("Please wait...");
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
-        firebaseAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    DatabaseReference myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-                    Map<String, Object> values = new HashMap<>();
-                    values.put("Gravatar", false);
-                    values.put("userName", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-                    values.put("Image", "https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
-                    myRef.updateChildren(values);
-                    database.getReference().updateChildren(values);
-                    Toast.makeText(SignUpActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(SignUpActivity.this, "Sign up fail", Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
+        firebaseAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                DatabaseReference myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+                Map<String, Object> values = new HashMap<>();
+                values.put("Gravatar", false);
+                values.put("userName", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+                values.put("Image", "https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
+                myRef.updateChildren(values);
+                database.getReference().updateChildren(values);
+                Toast.makeText(SignUpActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(SignUpActivity.this, "Sign up fail", Toast.LENGTH_LONG).show();
             }
+            progressDialog.dismiss();
         });
     }
 

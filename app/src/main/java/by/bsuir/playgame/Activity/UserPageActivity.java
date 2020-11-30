@@ -87,7 +87,7 @@ public class UserPageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     if (Objects.equals(child.getKey(), "Gravatar")) {
-                        if (Boolean.parseBoolean(child.getValue().toString())) {
+                        if (Boolean.parseBoolean(Objects.requireNonNull(child.getValue()).toString())) {
                             gravatar = true;
                             ((RadioButton) findViewById(R.id.GravatarButton)).setChecked(true);
                             findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
@@ -100,7 +100,7 @@ public class UserPageActivity extends AppCompatActivity {
                     } else if (Objects.equals(child.getKey(), "userName")) {
                         editText.setHint(Objects.requireNonNull(child.getValue()).toString());
                     } else {
-                        image = child.getValue().toString();
+                        image = Objects.requireNonNull(child.getValue()).toString();
                         if (gravatar) {
                             String hash = md5(Objects.requireNonNull(firebaseAuth.getCurrentUser().getEmail()));
                             String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
@@ -131,7 +131,7 @@ public class UserPageActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (!snapshot.exists()) {
-                            myRef.setValue(editText.getText().toString());
+                            myRef.child("userName").setValue(editText.getText().toString());
                             Toast.makeText(UserPageActivity.this, "Changed successfully", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(UserPageActivity.this, "This name already exists", Toast.LENGTH_SHORT).show();
@@ -232,7 +232,7 @@ public class UserPageActivity extends AppCompatActivity {
                 if (checked) {
                     findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
                     findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
-                    String hash = md5(Objects.requireNonNull(firebaseAuth.getCurrentUser().getEmail()));
+                    String hash = md5(Objects.requireNonNull(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getEmail()));
                     String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
                     Picasso.with(getApplicationContext())
                             .load(gravatarUrl)

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import by.bsuir.playgame.R;
+import by.bsuir.playgame.TypeField;
 import by.bsuir.playgame.ViewModel.ShipViewModel;
 
 public class PlacementRoomActivity extends AppCompatActivity {
@@ -164,7 +165,7 @@ public class PlacementRoomActivity extends AppCompatActivity {
             if (connectionString != null) {
                 Map<String, Object> values = new HashMap<>();
                 for (int i = 0; i < s.length; i++)
-                    if (s[i] == R.drawable._) {
+                    if (s[i] == TypeField.EMPTY.getCode()) {
                         values.put(String.valueOf(i), 0);
 
                     } else {

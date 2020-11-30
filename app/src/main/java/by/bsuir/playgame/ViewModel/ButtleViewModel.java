@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.R;
+import by.bsuir.playgame.TypeField;
 
 public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel {
 
@@ -23,7 +23,7 @@ public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = R.drawable._;
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
             }
         iconId.setValue(temperIconId);
     }
@@ -33,23 +33,22 @@ public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel
         shutElement.setValue(point);
     }
 
-    public LiveData<String> getShutElement(){
+    public LiveData<String> getShutElement() {
         return shutElement;
     }
 
-    public void setIconId(int position,int type) {
+    public void setIconId(int position, int type) {
         int[] temp = iconId.getValue();
-        if(type == 2){
-            Objects.requireNonNull(temp)[position] = R.drawable.common_google_signin_btn_icon_dark;
-        }
-        else if (type == 3){
-            Objects.requireNonNull(temp)[position] = R.drawable.square_png91;
-        }
-        else if (type == 4){
-            Objects.requireNonNull(temp)[position] = R.drawable.square_png97;
+        if (type == 2) {
+            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCode();
+        } else if (type == 3) {
+            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCode();
+        } else if (type == 4) {
+            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCode();
         }
         iconId.setValue(temp);
     }
+
     @Override
     public LiveData<int[]> getIcon() {
         return iconId;
