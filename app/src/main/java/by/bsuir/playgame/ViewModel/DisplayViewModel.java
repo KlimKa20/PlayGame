@@ -54,7 +54,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
         ArrayList<Integer> temp = new ArrayList<Integer>();
         temp.add(position);
         if (position % 10 == 0) {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position + i] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position + i);
                 } else if (field[position + i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -64,7 +64,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
         } else if (position % 10 == 9) {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position - i] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position - i);
                 } else if (field[position - i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -74,7 +74,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
         } else {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position + i] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position + i);
                 } else if (field[position + i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -86,7 +86,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                     break;
                 }
             }
-            for (int i = 1; i < 4 - temp.size(); i++) {
+            for (int i = 1; i < 5 - temp.size(); i++) {
                 if (field[position - i] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position - i);
                 } else if (field[position - i] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -100,11 +100,11 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
 
             }
         }
-        if (temp.size() != 0) {
+        if (temp.size() != 1) {
             Collections.sort(temp);
             destroyShip(temp, true);
         } else if (position < 10) {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position + i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position + i * 10);
                 } else if (field[position + i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -114,7 +114,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
         } else if (position > 89) {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position - i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position - i * 10);
                 } else if (field[position - i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -124,7 +124,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
         } else {
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 5; i++) {
                 if (field[position + i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position + i * 10);
                 } else if (field[position + i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {
@@ -136,7 +136,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                     break;
                 }
             }
-            for (int i = 1; i < 4 - temp.size(); i++) {
+            for (int i = 1; i < 5 - temp.size(); i++) {
                 if (field[position - i * 10] == R.drawable.common_google_signin_btn_icon_dark) {
                     temp.add(position - i * 10);
                 } else if (field[position - i * 10] == R.drawable.ic_launcher_background || field[position + i] == R.drawable.square_png97) {

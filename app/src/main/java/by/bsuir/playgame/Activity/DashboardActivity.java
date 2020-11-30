@@ -95,7 +95,7 @@ public class DashboardActivity extends AppCompatActivity {
         Intent intent = new Intent(DashboardActivity.this, PlacementRoomActivity.class);
         intent.putExtra("roomName", key);
         intent.putExtra("ViewModel", "Placement");
-        startActivity(intent);
+        startActivityForResult(intent, 1);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -107,7 +107,7 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Intent intent;
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case 1:
                 intent = new Intent(this, UserPageActivity.class);
                 break;
@@ -119,5 +119,18 @@ public class DashboardActivity extends AppCompatActivity {
         }
         startActivity(intent);
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 1) {
+            Toast.makeText(DashboardActivity.this, "Вы проиграли", Toast.LENGTH_LONG).show();
+            database.getReference().child("rooms/" + key).removeValue();
+        } else {
+            Toast.makeText(DashboardActivity.this, "Вы выиграли", Toast.LENGTH_LONG).show();
+        }
+
     }
 }

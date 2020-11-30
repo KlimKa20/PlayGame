@@ -104,14 +104,14 @@ public class RoomActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (Objects.requireNonNull(snapshot.getValue()).toString().equals("0")) {
                             buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(3);
+                            messageRef.setValue(role);
+                            available = false;
+                            textView.setText("Ход противника");
                         } else if (snapshot.getValue().toString().equals("1")) {
                             buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(2);
                         } else {
                             Toast.makeText(RoomActivity.this, "Выберите другую клеточку", Toast.LENGTH_LONG).show();
-                            messageRef.setValue(role);
-                            return;
                         }
-                        messageRef.setValue(role);
                     }
 
                     @Override
@@ -119,8 +119,7 @@ public class RoomActivity extends AppCompatActivity {
 
                     }
                 });
-                available = false;
-                textView.setText("Ход противника");
+
             }
         });
         displayViewModel.getDestoy().observe(this, stringObjectMap -> {
@@ -291,6 +290,13 @@ public class RoomActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 staticticRef.child("name").setValue(Objects.requireNonNull(snapshot.getValue()).toString());
                 staticticRef.child("ship").setValue(count);
+                Intent intent = new Intent();
+                if (count == 0) {
+                    setResult(1, intent);
+                } else {
+                    setResult(2, intent);
+                }
+                finish();
             }
 
             @Override
