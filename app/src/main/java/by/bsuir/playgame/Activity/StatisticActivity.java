@@ -32,7 +32,7 @@ public class StatisticActivity extends AppCompatActivity {
     private DatabaseReference myRef;
 
     private String p1Name, p2Name, p1Count, p2Count, point, currentName, nameRoom;
-    HashMap<String, String> names = new HashMap<>();
+    HashMap<String, List<String>> names = new HashMap<>();
 
     ListView statisticList;
 
@@ -58,7 +58,10 @@ public class StatisticActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot child : snapshot.getChildren()) {
-                    names.put(child.getKey(), Objects.requireNonNull(child.child("userName").getValue()).toString());
+                    List<String> temp = new ArrayList<>();
+                    temp.add( Objects.requireNonNull(child.child("userName").getValue()).toString());
+                    temp.add( Objects.requireNonNull(child.child("Image").getValue()).toString());
+                    names.put(child.getKey(),temp);
                 }
                 myRef = database.getReference("statistic");
                 addListenerStatistic();
@@ -101,15 +104,15 @@ public class StatisticActivity extends AppCompatActivity {
                     }
                     if (p1Name.equals(currentName)) {
                         if (p1Count.equals("0")) {
-                            statistics.add(new Statistics(names.get(p1Name), names.get(p2Name), nameRoom, false, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
+                            statistics.add(new Statistics(names.get(p1Name).get(0), names.get(p2Name).get(0),names.get(p1Name).get(1), names.get(p2Name).get(1), nameRoom, false, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
                         } else {
-                            statistics.add(new Statistics(names.get(p1Name), names.get(p2Name), nameRoom, true, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
+                            statistics.add(new Statistics(names.get(p1Name).get(0), names.get(p2Name).get(0),names.get(p1Name).get(1), names.get(p2Name).get(1), nameRoom, true, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
                         }
                     } else if (p2Name.equals(currentName)) {
                         if (p2Count.equals("0")) {
-                            statistics.add(new Statistics(names.get(p1Name), names.get(p2Name), nameRoom, false, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
+                            statistics.add(new Statistics(names.get(p1Name).get(0), names.get(p2Name).get(0),names.get(p1Name).get(1), names.get(p2Name).get(1), nameRoom, false, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
                         } else {
-                            statistics.add(new Statistics(names.get(p1Name), names.get(p2Name), nameRoom, true, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
+                            statistics.add(new Statistics(names.get(p1Name).get(0), names.get(p2Name).get(0),names.get(p1Name).get(1), names.get(p2Name).get(1), nameRoom, true, Integer.parseInt(p1Count), Integer.parseInt(p2Count)));
                         }
                     }
                 }

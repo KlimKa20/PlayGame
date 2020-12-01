@@ -237,6 +237,7 @@ public class UserPageActivity extends AppCompatActivity {
                     Picasso.with(getApplicationContext())
                             .load(gravatarUrl)
                             .into(imageView);
+                    myRef.child("Image").setValue(gravatarUrl);
                     myRef.child("Gravatar").setValue(true);
                 }
                 break;
@@ -248,7 +249,7 @@ public class UserPageActivity extends AppCompatActivity {
                             .load(image)
                             .into(imageView);
                     myRef.child("Gravatar").setValue(false);
-
+                    myRef.child("Image").setValue("https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
                 }
                 break;
         }

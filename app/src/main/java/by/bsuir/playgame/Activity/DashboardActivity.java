@@ -26,6 +26,8 @@ import java.util.Objects;
 import by.bsuir.playgame.R;
 
 public class DashboardActivity extends AppCompatActivity {
+    private static final int REQUEST_HOST = 103;
+    private static final int REQUEST_GUEST = 104;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase database;
     private DatabaseReference myRef;
@@ -70,23 +72,26 @@ public class DashboardActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void moveToRoom() {
+    public void moveToRoom(int index) {
         Intent intent = new Intent(DashboardActivity.this, PlacementRoomActivity.class);
         intent.putExtra("roomName", key);
         intent.putExtra("ViewModel", "Placement");
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, index);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == 1) {
-            Toast.makeText(DashboardActivity.this, "Вы проиграли", Toast.LENGTH_LONG).show();
-            database.getReference().child("rooms/" + key).removeValue();
-        } else if (resultCode == 2) {
-            Toast.makeText(DashboardActivity.this, "Вы выиграли", Toast.LENGTH_LONG).show();
+        if (requestCode == REQUEST_HOST) {
+            if (resultCode == 0) {
+                Toast.makeText(DashboardActivity.this, "Вы проиграли", Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQUEST_GUEST) {
+            if (resultCode == 0) {
+                database.getReference("rooms/").child(key).removeValue();
+                Toast.makeText(DashboardActivity.this, "Вы выиграли", Toast.LENGTH_LONG).show();
+            }
         } else {
-            database.getReference().child("rooms/" + key).removeValue();
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -99,6 +104,10 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void onCreateClick(View v) {
         String roomName = textView.getText().toString();
+        if(roomName.isEmpty()){
+            Toast.makeText(DashboardActivity.this, "Field is empty", Toast.LENGTH_LONG).show();
+            return;
+        }
         key = database.getReference().child("rooms").push().getKey();
         myRef = database.getReference().child("rooms");
 
@@ -116,11 +125,15 @@ public class DashboardActivity extends AppCompatActivity {
         childUpdates = new HashMap<>();
         childUpdates.put("/rooms/" + key + "/p1", values);
         database.getReference().updateChildren(childUpdates);
-        moveToRoom();
+        moveToRoom(REQUEST_HOST);
     }
 
     private void onConnectClick(View v) {
         key = textView.getText().toString();
+        if(key.isEmpty()){
+            Toast.makeText(DashboardActivity.this, "Room doesn't exist", Toast.LENGTH_LONG).show();
+            return;
+        }
         myRef = database.getReference("rooms/").child(key);
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -128,7 +141,7 @@ public class DashboardActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     myRef.child("/p2").child("user").setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
                     myRef.child("/p2").child("ship").setValue(10);
-                    moveToRoom();
+                    moveToRoom(REQUEST_GUEST);
                 } else {
                     Toast.makeText(DashboardActivity.this, "Room doesn't exist", Toast.LENGTH_LONG).show();
                 }

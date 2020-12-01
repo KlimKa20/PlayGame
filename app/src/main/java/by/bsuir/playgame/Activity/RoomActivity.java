@@ -159,6 +159,7 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == 0) {
+                    Toast.makeText(RoomActivity.this, "Вы проиграли", Toast.LENGTH_LONG).show();
                     messageRef.setValue("Finish" + role);
                     available = false;
                     textView.setText("Вы проиграли");
@@ -285,24 +286,10 @@ public class RoomActivity extends AppCompatActivity {
     }
 
     private void createStatistic(int count) {
-        database.getReference("Users/" + Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid()).child("userName").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                staticticRef.child("name").setValue(Objects.requireNonNull(snapshot.getValue()).toString());
-                staticticRef.child("ship").setValue(count);
-                Intent intent = new Intent();
-                if (count == 0) {
-                    setResult(1, intent);
-                } else {
-                    setResult(2, intent);
-                }
-                finish();
-            }
+        staticticRef.child("name").setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
+        staticticRef.child("ship").setValue(count);
+        setResult(RESULT_OK);
+        finish();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }

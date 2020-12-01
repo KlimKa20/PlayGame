@@ -7,7 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -38,6 +41,9 @@ public class StaticAdapter extends ArrayAdapter<Statistics> {
         TextView p2Name = (TextView) view.findViewById(R.id.p2Name);
         TextView p2Count = (TextView) view.findViewById(R.id.p2Count);
 
+        ImageView p1View = (ImageView) view.findViewById(R.id.pView1);
+        ImageView p2View = (ImageView) view.findViewById(R.id.pView2);
+
         TextView nameRoom = (TextView) view.findViewById(R.id.nameRoom);
         TextView status = (TextView) view.findViewById(R.id.status);
 
@@ -53,6 +59,12 @@ public class StaticAdapter extends ArrayAdapter<Statistics> {
             status.setText("Поражение");
             view.setBackgroundColor(Color.RED);
         }
+        Picasso.with(getContext())
+                .load(statistic.getP1View())
+                .into(p1View);
+        Picasso.with(getContext())
+                .load(statistic.getP2View())
+                .into(p2View);
         p2Count.setText(statistic.getP2Ship() + " :Кораблей");
         nameRoom.setText("Комната: " + statistic.getNameRoom());
 
