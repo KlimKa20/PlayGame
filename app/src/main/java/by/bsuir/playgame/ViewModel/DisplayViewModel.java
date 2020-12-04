@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.TypeField;
+import by.bsuir.playgame.Enum.TypeField;
 
 public class DisplayViewModel extends AndroidViewModel implements IFieldViewModel {
 
@@ -26,7 +26,7 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCodeImage();
             }
         iconId.setValue(temperIconId);
     }
@@ -38,13 +38,13 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
 
     public void setIconId(int position, int type) {
         int[] temp = iconId.getValue();
-        if (type == 2) {
-            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCode();
+        if (type == TypeField.HURT.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCodeImage();
             checkDestroy(position);
-        } else if (type == 3) {
-            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCode();
-        } else if (type == 4) {
-            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCode();
+        } else if (type == TypeField.LOSE.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCodeImage();
+        } else if (type == TypeField.DESTROY.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCodeImage();
         }
         iconId.setValue(temp);
     }
@@ -55,9 +55,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
         temp.add(position);
         if (position % 10 == 0) {
             for (int i = 1; i < 5; i++) {
-                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCode()) {
+                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCodeImage()) {
                     temp.add(position + i);
-                } else if (field[position + i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position + i] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -65,9 +65,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else if (position % 10 == 9) {
             for (int i = 1; i < 5; i++) {
-                if (Objects.requireNonNull(field)[position - i] == TypeField.HURT.getCode()) {
+                if (Objects.requireNonNull(field)[position - i] == TypeField.HURT.getCodeImage()) {
                     temp.add(position - i);
-                } else if (field[position - i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position - i] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -75,9 +75,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else {
             for (int i = 1; i < 5; i++) {
-                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCode()) {
+                if (Objects.requireNonNull(field)[position + i] == TypeField.HURT.getCodeImage()) {
                     temp.add(position + i);
-                } else if (field[position + i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position + i] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -87,9 +87,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
             for (int i = 1; i < 5 - temp.size(); i++) {
-                if (field[position - i] == TypeField.HURT.getCode()) {
+                if (field[position - i] == TypeField.HURT.getCodeImage()) {
                     temp.add(position - i);
-                } else if (field[position - i] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position - i] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -106,9 +106,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             destroyShip(temp, true);
         } else if (position < 10) {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i * 10] == TypeField.HURT.getCode()) {
+                if (field[position + i * 10] == TypeField.HURT.getCodeImage()) {
                     temp.add(position + i * 10);
-                } else if (field[position + i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position + i * 10] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -116,9 +116,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else if (position > 89) {
             for (int i = 1; i < 5; i++) {
-                if (field[position - i * 10] == TypeField.HURT.getCode()) {
+                if (field[position - i * 10] == TypeField.HURT.getCodeImage()) {
                     temp.add(position - i * 10);
-                } else if (field[position - i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position - i * 10] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -126,9 +126,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
             }
         } else {
             for (int i = 1; i < 5; i++) {
-                if (field[position + i * 10] == TypeField.HURT.getCode()) {
+                if (field[position + i * 10] == TypeField.HURT.getCodeImage()) {
                     temp.add(position + i * 10);
-                } else if (field[position + i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position + i * 10] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -138,9 +138,9 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
                 }
             }
             for (int i = 1; i < 5 - temp.size(); i++) {
-                if (field[position - i * 10] == TypeField.HURT.getCode()) {
+                if (field[position - i * 10] == TypeField.HURT.getCodeImage()) {
                     temp.add(position - i * 10);
-                } else if (field[position - i * 10] == TypeField.SHIP.getCode() || field[position + i] == TypeField.DESTROY.getCode()) {
+                } else if (field[position - i * 10] == TypeField.SHIP.getCodeImage() || field[position + i] == TypeField.DESTROY.getCodeImage()) {
                     return;
                 } else {
                     break;
@@ -227,16 +227,16 @@ public class DisplayViewModel extends AndroidViewModel implements IFieldViewMode
 
     public void setIcon(int[] temp) {
         for (int i = 0; i < temp.length; i++) {
-            if (temp[i] == 0) {
-                temp[i] = TypeField.EMPTY.getCode();
-            } else if (temp[i] == 2) {
-                temp[i] = TypeField.HURT.getCode();
-            } else if (temp[i] == 3) {
-                temp[i] = TypeField.LOSE.getCode();
-            } else if (temp[i] == 4) {
-                temp[i] = TypeField.DESTROY.getCode();
+            if (temp[i] == TypeField.EMPTY.getCodeField()) {
+                temp[i] = TypeField.EMPTY.getCodeImage();
+            } else if (temp[i] == TypeField.HURT.getCodeField()) {
+                temp[i] = TypeField.HURT.getCodeImage();
+            } else if (temp[i] == TypeField.LOSE.getCodeField()) {
+                temp[i] = TypeField.LOSE.getCodeImage();
+            } else if (temp[i] == TypeField.DESTROY.getCodeField()) {
+                temp[i] = TypeField.DESTROY.getCodeImage();
             } else {
-                temp[i] = TypeField.SHIP.getCode();
+                temp[i] = TypeField.SHIP.getCodeImage();
             }
         }
         iconId.setValue(temp);

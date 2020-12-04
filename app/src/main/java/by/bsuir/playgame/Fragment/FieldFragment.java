@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Objects;
 
+import by.bsuir.playgame.Activity.DashboardActivity;
 import by.bsuir.playgame.Adapter.FieldAdapter;
 import by.bsuir.playgame.Interfece.IFieldViewModel;
 import by.bsuir.playgame.R;
@@ -35,12 +36,11 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
         super.onCreate(savedInstanceState);
 
         Intent intent = Objects.requireNonNull(getActivity()).getIntent();
-        if (intent.getStringExtra("ViewModel").equals("Placement")) {
+        if (intent.getStringExtra(DashboardActivity.PARAM_INTENT_TYPE_VIEWMODEL).equals(DashboardActivity.TYPE_VIEWMODEL_PLACEMENT)) {
             shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(ShipViewModel.class);
         } else {
             shipViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(DisplayViewModel.class);
         }
-
         shipViewModel.getIcon().observe(Objects.requireNonNull(requireActivity()), s -> {
             FieldAdapter fieldAdapter = new FieldAdapter(getContext(), s, nameList, this);
             recyclerView.setAdapter(fieldAdapter);
@@ -68,5 +68,4 @@ public class FieldFragment extends Fragment implements FieldAdapter.ItemListener
     public void onItemClick(String idField) {
         shipViewModel.setPoint(idField);
     }
-
 }

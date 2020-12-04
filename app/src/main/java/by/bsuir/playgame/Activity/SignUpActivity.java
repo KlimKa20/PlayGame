@@ -52,25 +52,25 @@ public class SignUpActivity extends AppCompatActivity {
         String password1 = passwordEt1.getText().toString();
         String password2 = passwordEt2.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            emailEt.setError("Enter your Email");
+            emailEt.setError(getString(R.string.Enter_your_Email));
             return;
         } else if (TextUtils.isEmpty(password1)) {
-            passwordEt1.setError("Enter your Password");
+            passwordEt1.setError(getString(R.string.Enter_your_Password));
             return;
         } else if (TextUtils.isEmpty(password2)) {
-            passwordEt2.setError("Confirm your Password");
+            passwordEt2.setError(getString(R.string.Confirm_your_Password));
             return;
         } else if (!password1.equals(password2)) {
-            passwordEt2.setError("Different password");
+            passwordEt2.setError(getString(R.string.error_password));
             return;
         } else if (password1.length() < 4) {
-            passwordEt1.setError("Length should be >4");
+            passwordEt1.setError(getString(R.string.short_password));
             return;
         } else if (!isValidEmail(email)) {
-            emailEt.setError("Invalid email");
+            emailEt.setError(getString(R.string.Invalid_email));
             return;
         }
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage(getString(R.string.wait));
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
         firebaseAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(this, task -> {
@@ -82,12 +82,12 @@ public class SignUpActivity extends AppCompatActivity {
                 values.put("Image", "https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
                 myRef.updateChildren(values);
                 database.getReference().updateChildren(values);
-                Toast.makeText(SignUpActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
+                Toast.makeText(SignUpActivity.this, getString(R.string.Successfully_registered), Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
                 startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(SignUpActivity.this, "Sign up fail", Toast.LENGTH_LONG).show();
+                Toast.makeText(SignUpActivity.this, getString(R.string.Sign_up_fail), Toast.LENGTH_LONG).show();
             }
             progressDialog.dismiss();
         });

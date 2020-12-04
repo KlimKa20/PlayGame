@@ -75,7 +75,7 @@ public class UserPageActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage(getString(R.string.wait));
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
 
@@ -132,9 +132,9 @@ public class UserPageActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (!snapshot.exists()) {
                             myRef.child("userName").setValue(editText.getText().toString());
-                            Toast.makeText(UserPageActivity.this, "Changed successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserPageActivity.this, getString(R.string.Changed_successfully), Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(UserPageActivity.this, "This name already exists", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(UserPageActivity.this, getString(R.string.name_already_exists), Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -144,7 +144,7 @@ public class UserPageActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                Toast.makeText(UserPageActivity.this, "Field is empty!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserPageActivity.this, getString(R.string.Empty), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -153,7 +153,7 @@ public class UserPageActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "select image"), REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.Select_image)), REQUEST_CODE);
     }
 
     @Override
@@ -194,20 +194,17 @@ public class UserPageActivity extends AppCompatActivity {
     public void btnUpload_Click(View v) {
         if (imgUri != null) {
             ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setTitle("Uploading Image");
+            dialog.setTitle(getString(R.string.Uploading_Image));
             dialog.show();
 
             StorageReference ref = reference.child(STORAGE_PATH + System.currentTimeMillis() + "." + getImageExt(imgUri));
             ref.putFile(imgUri).addOnSuccessListener(taskSnapshot -> {
                 dialog.dismiss();
-                Toast.makeText(getApplicationContext(), "Image uploaded", Toast.LENGTH_SHORT).show();
-                Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put("Image", uri.toString());
-                        myRef.updateChildren(childUpdates);
-                    }
+                Toast.makeText(getApplicationContext(), getString(R.string.Image_uploaded), Toast.LENGTH_SHORT).show();
+                Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().addOnSuccessListener(uri -> {
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("Image", uri.toString());
+                    myRef.updateChildren(childUpdates);
                 });
 
             })
@@ -220,7 +217,7 @@ public class UserPageActivity extends AppCompatActivity {
                         dialog.setMessage("Uploaded" + (int) progress + "%");
                     });
         } else {
-            Toast.makeText(getApplicationContext(), "Please select image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.Select_image), Toast.LENGTH_SHORT).show();
         }
     }
 

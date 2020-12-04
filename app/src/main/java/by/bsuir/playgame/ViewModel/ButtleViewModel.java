@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.TypeField;
+import by.bsuir.playgame.Enum.TypeField;
 
 public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel {
 
@@ -23,7 +23,7 @@ public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCodeImage();
             }
         iconId.setValue(temperIconId);
     }
@@ -39,12 +39,12 @@ public class ButtleViewModel extends AndroidViewModel implements IFieldViewModel
 
     public void setIconId(int position, int type) {
         int[] temp = iconId.getValue();
-        if (type == 2) {
-            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCode();
-        } else if (type == 3) {
-            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCode();
-        } else if (type == 4) {
-            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCode();
+        if (type == TypeField.HURT.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.HURT.getCodeImage();
+        } else if (type == TypeField.LOSE.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.LOSE.getCodeImage();
+        } else if (type == TypeField.DESTROY.getCodeField()) {
+            Objects.requireNonNull(temp)[position] = TypeField.DESTROY.getCodeImage();
         }
         iconId.setValue(temp);
     }

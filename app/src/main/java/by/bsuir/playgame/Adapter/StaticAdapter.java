@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import by.bsuir.playgame.R;
-import by.bsuir.playgame.Statistics;
+import by.bsuir.playgame.Model.Statistics;
 
 public class StaticAdapter extends ArrayAdapter<Statistics> {
 
@@ -49,14 +49,14 @@ public class StaticAdapter extends ArrayAdapter<Statistics> {
 
         Statistics statistic = statistics.get(position);
 
-        p1Name.setText("Игрок 1: " + statistic.getP1Name());
-        p1Count.setText("Кораблей: " + statistic.getP1Ship());
-        p2Name.setText(statistic.getP2Name() + " :Игрок 2");
+        p1Name.setText(getContext().getString(R.string.Player1) + statistic.getP1Name());
+        p1Count.setText(getContext().getString(R.string.Ship1) + statistic.getP1Ship());
+        p2Name.setText(statistic.getP2Name() + getContext().getString(R.string.Player2));
         if (statistic.isStatus()) {
-            status.setText("Победа");
+            status.setText(getContext().getString(R.string.you_win));
             view.setBackgroundColor(Color.GREEN);
         } else {
-            status.setText("Поражение");
+            status.setText(getContext().getString(R.string.You_lose));
             view.setBackgroundColor(Color.RED);
         }
         Picasso.with(getContext())
@@ -65,8 +65,8 @@ public class StaticAdapter extends ArrayAdapter<Statistics> {
         Picasso.with(getContext())
                 .load(statistic.getP2View())
                 .into(p2View);
-        p2Count.setText(statistic.getP2Ship() + " :Кораблей");
-        nameRoom.setText("Комната: " + statistic.getNameRoom());
+        p2Count.setText(statistic.getP2Ship() + getContext().getString(R.string.Ship2));
+        nameRoom.setText(getContext().getString(R.string.Room) + statistic.getNameRoom());
 
         return view;
     }

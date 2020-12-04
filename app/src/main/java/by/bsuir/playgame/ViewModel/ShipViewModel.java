@@ -10,15 +10,17 @@ import androidx.lifecycle.MutableLiveData;
 import java.util.Objects;
 
 import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.TypeField;
+import by.bsuir.playgame.R;
+import by.bsuir.playgame.Enum.ShipType;
+import by.bsuir.playgame.Enum.TypeField;
 
 public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
-    private final MutableLiveData<String> countPoint = new MutableLiveData<>();
-    private final MutableLiveData<String> Points = new MutableLiveData<>();
+    private final MutableLiveData<Integer> countPoint = new MutableLiveData<>();
     private final MutableLiveData<Integer> resultOfSetting = new MutableLiveData<>();
     private final MutableLiveData<int[]> iconId = new MutableLiveData<>();
     private final MutableLiveData<String> error = new MutableLiveData<>();
 
+    boolean deleter = false;
     String tempPoints = "";
 
 
@@ -27,30 +29,35 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
-                temperIconId[i * 10 + j] = TypeField.EMPTY.getCode();
+                temperIconId[i * 10 + j] = TypeField.EMPTY.getCodeImage();
             }
         iconId.setValue(temperIconId);
     }
 
-    public void setShip(String count) {
-        countPoint.postValue(count);
+    public void setShip(ShipType count) {
+        countPoint.postValue(count.getSize());
+    }
+
+    public void deleteShip() {
+        deleter = true;
     }
 
     public void setPoint(String point) {
-        String sizeShip = countPoint.getValue();
-        if (sizeShip != null && Integer.parseInt(sizeShip) >= 2) {
-            if (tempPoints.length() == 2) {
-                Points.setValue(tempPoints + point + countPoint.getValue());
+        int sizeShip = countPoint.getValue();
+        if (sizeShip >= 2) {
+            if (tempPoints.length() >= 2) {
+                countPoint.postValue(0);
+                SetShip(tempPoints + point, sizeShip);
                 tempPoints = "";
-                countPoint.postValue("0");
-                SetShip(Objects.requireNonNull(Points.getValue()));
             } else {
                 tempPoints = point;
             }
-        } else if (sizeShip != null && (Integer.parseInt(sizeShip) == 1 || Integer.parseInt(sizeShip) == -1)) {
-            Points.setValue(point + countPoint.getValue());
-            countPoint.postValue("0");
-            SetShip(Objects.requireNonNull(Points.getValue()));
+        } else if (sizeShip == 1) {
+            countPoint.postValue(0);
+            SetShip(point, sizeShip);
+        } else if (deleter) {
+            SetShip(point, 0);
+            deleter = false;
         }
     }
 
@@ -68,36 +75,36 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
     }
 
 
-    private void SetShip(String value) {
+    private void SetShip(String value, int sizeShip) {
         int[] temperIconId = iconId.getValue();
-        if (value.length() == 5) {
+        if (sizeShip >= 2) {
             if (!check(Integer.parseInt(value.substring(0, 2))) || !check(Integer.parseInt(value.substring(2, 4)))) {
-                error.setValue("Нельзя расположить корабль");
+                error.setValue(getApplication().getResources().getString(R.string.Placement_error));
                 return;
             }
-            if (value.charAt(0) == value.charAt(2) && Math.abs(value.charAt(1) - value.charAt(3)) == value.charAt(4) - '0' - 1) {
+            if (value.charAt(0) == value.charAt(2) && Math.abs(value.charAt(1) - value.charAt(3)) == sizeShip - 1) {
                 for (int i = Math.min(value.charAt(1), value.charAt(3)) - '0'; i <= Math.max(value.charAt(1), value.charAt(3)) - '0'; i++) {
-                    Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + i] = TypeField.SHIP.getCode();
+                    Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + i] = TypeField.SHIP.getCodeImage();
                 }
-            } else if (value.charAt(1) == value.charAt(3) && Math.abs(value.charAt(0) - value.charAt(2)) == value.charAt(4) - '0' - 1) {
+            } else if (value.charAt(1) == value.charAt(3) && Math.abs(value.charAt(0) - value.charAt(2)) == sizeShip - 1) {
                 for (int i = Math.min(value.charAt(0), value.charAt(2)) - '0'; i <= Math.max(value.charAt(0), value.charAt(2)) - '0'; i++) {
-                    Objects.requireNonNull(temperIconId)[i * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCode();
+                    Objects.requireNonNull(temperIconId)[i * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCodeImage();
                 }
             } else {
-                error.setValue("Нельзя расположить корабль");
+                error.setValue(getApplication().getResources().getString(R.string.Placement_error));
                 return;
             }
-            resultOfSetting.setValue(value.charAt(value.length() - 1) - '0');
-        } else if (value.length() == 4) {
-            int size = deleteShip(Integer.parseInt(value.substring(0, 2)));
+            resultOfSetting.setValue(sizeShip);
+        } else if (sizeShip == 0 && deleter) {
+            int size = deleteShip(Integer.parseInt(value));
             resultOfSetting.setValue(size * -1);
         } else {
             if (!check(Integer.parseInt(value.substring(0, 2)))) {
-                error.setValue("Нельзя расположить корабль");
+                error.setValue(getApplication().getResources().getString(R.string.Placement_error));
                 return;
             }
-            Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCode();
-            resultOfSetting.setValue(value.charAt(value.length() - 1) - '0');
+            Objects.requireNonNull(temperIconId)[(value.charAt(0) - '0') * 10 + (value.charAt(1) - '0')] = TypeField.SHIP.getCodeImage();
+            resultOfSetting.setValue(sizeShip);
         }
         iconId.setValue(temperIconId);
     }
@@ -106,7 +113,7 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
     public int deleteShip(int position) {
         int[] temperIconId = iconId.getValue();
         int fullField = Objects.requireNonNull(temperIconId)[position];
-        temperIconId[position] = TypeField.EMPTY.getCode();
+        temperIconId[position] = TypeField.EMPTY.getCodeImage();
         int sizeship = 1;
         if (position % 10 == 0 && fullField == temperIconId[position + 1]) {
             return sizeship + deleteShip(position + 1);
@@ -163,6 +170,4 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
         }
         return true;
     }
-
-
 }

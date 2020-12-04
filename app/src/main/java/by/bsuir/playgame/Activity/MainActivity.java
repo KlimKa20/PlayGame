@@ -42,22 +42,22 @@ public class MainActivity extends AppCompatActivity {
         String email = emailEt.getText().toString();
         String password = passwordEt.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            emailEt.setError("Enter your Email");
+            emailEt.setError(getString(R.string.enter_your_email));
             return;
         } else if (TextUtils.isEmpty(password)) {
-            passwordEt.setError("Enter your Password");
+            passwordEt.setError(getString(R.string.enter_your_password));
             return;
         }
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage(getString(R.string.wait));
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
         firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(MainActivity.this, "Successfully Login", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, getString(R.string.Successfully_Login), Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
                 startActivity(intent);
             } else {
-                Toast.makeText(MainActivity.this, "Sign in fail", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, getString(R.string.Sign_in_fail), Toast.LENGTH_LONG).show();
             }
             progressDialog.dismiss();
         });

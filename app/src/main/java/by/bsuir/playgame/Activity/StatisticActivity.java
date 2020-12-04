@@ -21,7 +21,7 @@ import java.util.Objects;
 
 import by.bsuir.playgame.Adapter.StaticAdapter;
 import by.bsuir.playgame.R;
-import by.bsuir.playgame.Statistics;
+import by.bsuir.playgame.Model.Statistics;
 
 
 public class StatisticActivity extends AppCompatActivity {
@@ -47,7 +47,7 @@ public class StatisticActivity extends AppCompatActivity {
         statisticList = (ListView) findViewById(R.id.statisticList);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage(getString(R.string.wait));
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
         addReadAllName();

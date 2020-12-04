@@ -1,4 +1,4 @@
-package by.bsuir.playgame;
+package by.bsuir.playgame.Model;
 
 public class Statistics {
 

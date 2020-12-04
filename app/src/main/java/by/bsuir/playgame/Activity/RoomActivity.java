@@ -1,6 +1,5 @@
 package by.bsuir.playgame.Activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -22,9 +21,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import by.bsuir.playgame.Enum.TypeField;
 import by.bsuir.playgame.R;
 import by.bsuir.playgame.ViewModel.ButtleViewModel;
 import by.bsuir.playgame.ViewModel.DisplayViewModel;
+
+import static by.bsuir.playgame.Enum.StatusGame.FINISH_GUEST;
+import static by.bsuir.playgame.Enum.StatusGame.FINISH_HOST;
+import static by.bsuir.playgame.Enum.StatusGame.GUEST;
+import static by.bsuir.playgame.Enum.StatusGame.HOST;
 
 public class RoomActivity extends AppCompatActivity {
 
@@ -35,7 +40,6 @@ public class RoomActivity extends AppCompatActivity {
     String role = "";
     ButtleViewModel buttleViewModel;
     DisplayViewModel displayViewModel;
-    private ProgressDialog progressDialog;
     private FirebaseDatabase database;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference messageRef, myRef, displayRef, buttleRef, restRef, staticticRef;
@@ -50,13 +54,12 @@ public class RoomActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
 
         Intent postIntent = getIntent();
-        roomName = postIntent.getStringExtra("roomName");
+        roomName = postIntent.getStringExtra(DashboardActivity.PARAM_INTENT_NAME_OF_ROOM);
 
         firebaseAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         buttleViewModel = ViewModelProviders.of(this).get(ButtleViewModel.class);
         displayViewModel = ViewModelProviders.of(this).get(DisplayViewModel.class);
-        progressDialog = new ProgressDialog(this);
 
         textView = findViewById(R.id.namePlayer);
         fieldFragment1 = findViewById(R.id.fragment1);
@@ -88,7 +91,7 @@ public class RoomActivity extends AppCompatActivity {
                 addRoomEventListener();
                 addListenerOfFinish();
                 addWriterNameOfRoom();
-                textView.setText("Ход противника");
+                textView.setText(R.string.Opponent_move);
             }
 
             @Override
@@ -102,15 +105,15 @@ public class RoomActivity extends AppCompatActivity {
                 buttleRef.child(String.valueOf(Integer.parseInt(s))).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (Objects.requireNonNull(snapshot.getValue()).toString().equals("0")) {
-                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(3);
+                        if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == TypeField.EMPTY.getCodeField()) {
+                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(TypeField.LOSE.getCodeField());
                             messageRef.setValue(role);
                             available = false;
-                            textView.setText("Ход противника");
-                        } else if (snapshot.getValue().toString().equals("1")) {
-                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(2);
+                            textView.setText(R.string.Opponent_move);
+                        } else if (Integer.parseInt(snapshot.getValue().toString()) == TypeField.HURT.getCodeField()) {
+                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(TypeField.HURT.getCodeField());
                         } else {
-                            Toast.makeText(RoomActivity.this, "Выберите другую клеточку", Toast.LENGTH_LONG).show();
+                            Toast.makeText(RoomActivity.this, getString(R.string.Chose_other_field), Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -159,11 +162,11 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == 0) {
-                    Toast.makeText(RoomActivity.this, "Вы проиграли", Toast.LENGTH_LONG).show();
-                    messageRef.setValue("Finish" + role);
+                    Toast.makeText(RoomActivity.this, getString(R.string.You_lose), Toast.LENGTH_LONG).show();
+                    messageRef.setValue("Finish " + role);
                     available = false;
-                    textView.setText("Вы проиграли");
-                    createStatistic(0);
+                    textView.setText(getString(R.string.You_lose));
+                    createStatistic(PlacementRoomActivity.REST_SHIPS);
                 }
             }
 
@@ -256,23 +259,23 @@ public class RoomActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (role.equals("host")) {
-                    if (Objects.equals(snapshot.getValue(String.class), "guest")) {
+                    if (Objects.equals(snapshot.getValue(String.class), GUEST.getName())) {
                         available = true;
-                        textView.setText("Ваш Ход");
-                    } else if (Objects.equals(snapshot.getValue(String.class), "Finishguest")) {
-                        Toast.makeText(RoomActivity.this, "Победа", Toast.LENGTH_LONG).show();
+                        textView.setText(R.string.your_move);
+                    } else if (Objects.equals(snapshot.getValue(String.class), FINISH_GUEST.getName())) {
+                        Toast.makeText(RoomActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
                         available = false;
-                        textView.setText("Вы выиграли");
+                        textView.setText(getString(R.string.you_win));
                         createStatistic(RestShip);
                     }
                 } else {
-                    if (Objects.equals(snapshot.getValue(String.class), "host")) {
+                    if (Objects.equals(snapshot.getValue(String.class), HOST.getName())) {
                         available = true;
-                        textView.setText("Ваш Ход");
-                    } else if (Objects.equals(snapshot.getValue(String.class), "Finishhost")) {
-                        Toast.makeText(RoomActivity.this, "Победа", Toast.LENGTH_LONG).show();
+                        textView.setText(R.string.your_move);
+                    } else if (Objects.equals(snapshot.getValue(String.class), FINISH_HOST.getName())) {
+                        Toast.makeText(RoomActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
                         available = false;
-                        textView.setText("Вы выиграли");
+                        textView.setText(getString(R.string.you_win));
                         createStatistic(RestShip);
                     }
                 }
