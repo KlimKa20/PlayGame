@@ -1,60 +1,36 @@
 package by.bsuir.playgame.Activity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 import by.bsuir.playgame.R;
+import by.bsuir.playgame.ViewModel.UserPageViewModel;
 
 public class UserPageActivity extends AppCompatActivity {
 
-    private FirebaseAuth firebaseAuth;
-    private FirebaseDatabase database;
-    private FirebaseStorage firebaseStorage;
-    private DatabaseReference myRef;
-    private StorageReference reference;
-    private Uri imgUri;
     private ProgressDialog progressDialog;
-    private boolean gravatar = false;
-    private String image;
+    private UserPageViewModel userPageViewModel;
 
     ImageView imageView;
-    Button button;
+    Button setNewName;
     EditText editText;
 
     public static final String STORAGE_PATH = "image/";
@@ -65,13 +41,10 @@ public class UserPageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_page);
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance();
-        firebaseStorage = FirebaseStorage.getInstance();
+        userPageViewModel = ViewModelProviders.of(this).get(UserPageViewModel.class);
 
         editText = findViewById(R.id.NameUser);
-        button = findViewById(R.id.ApplyName);
+        setNewName = findViewById(R.id.ApplyName);
         imageView = findViewById(R.id.imageView);
 
         progressDialog = new ProgressDialog(this);
@@ -79,74 +52,44 @@ public class UserPageActivity extends AppCompatActivity {
         progressDialog.show();
         progressDialog.setCanceledOnTouchOutside(false);
 
-        reference = firebaseStorage.getReference();
-        myRef = database.getReference("Users").child(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    if (Objects.equals(child.getKey(), "Gravatar")) {
-                        if (Boolean.parseBoolean(Objects.requireNonNull(child.getValue()).toString())) {
-                            gravatar = true;
-                            ((RadioButton) findViewById(R.id.GravatarButton)).setChecked(true);
-                            findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
-                            findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
-                        } else {
-                            ((RadioButton) findViewById(R.id.FireBaseButton)).setChecked(true);
-                            findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
-                            findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
-                        }
-                    } else if (Objects.equals(child.getKey(), "userName")) {
-                        editText.setHint(Objects.requireNonNull(child.getValue()).toString());
-                    } else {
-                        image = Objects.requireNonNull(child.getValue()).toString();
-                        if (gravatar) {
-                            String hash = md5(Objects.requireNonNull(firebaseAuth.getCurrentUser().getEmail()));
-                            String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
-                            Picasso.with(getApplicationContext())
-                                    .load(gravatarUrl)
-                                    .into(imageView);
-                        } else {
-                            Picasso.with(getApplicationContext())
-                                    .load(image)
-                                    .into(imageView);
-                        }
-                        progressDialog.dismiss();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-        button.setOnClickListener(v -> {
-            if (!editText.getText().toString().isEmpty()) {
-                Query query = database.getReference().child("Users").orderByChild("userName").equalTo(editText.getText().toString());
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (!snapshot.exists()) {
-                            myRef.child("userName").setValue(editText.getText().toString());
-                            Toast.makeText(UserPageActivity.this, getString(R.string.Changed_successfully), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(UserPageActivity.this, getString(R.string.name_already_exists), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+        userPageViewModel.isGravatar().observe(this, status -> {
+            if (status) {
+                ((RadioButton) findViewById(R.id.GravatarButton)).setChecked(true);
+                findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
+                findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
             } else {
-                Toast.makeText(UserPageActivity.this, getString(R.string.Empty), Toast.LENGTH_SHORT).show();
+                ((RadioButton) findViewById(R.id.FireBaseButton)).setChecked(true);
+                findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
+                findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
             }
         });
+
+        userPageViewModel.getImage().observe(this, image -> {
+            Picasso.with(getApplicationContext())
+                    .load(image)
+                    .into(imageView);
+            progressDialog.dismiss();
+        });
+
+        userPageViewModel.getUserName().observe(this, userName -> editText.setHint(userName));
+        userPageViewModel.getDialogMessage().observe(this, text -> progressDialog.setMessage(text));
+        userPageViewModel.getOutputMessage().observe(this, text -> {
+            progressDialog.dismiss();
+            Toast.makeText(UserPageActivity.this, text, Toast.LENGTH_SHORT).show();
+        });
+
+        userPageViewModel.getImgUri().observe(this, uri -> {
+            try {
+                Bitmap bm = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                imageView.setImageBitmap(bm);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        userPageViewModel.setInformation();
+
+        setNewName.setOnClickListener(v -> userPageViewModel.setNewName(editText.getText().toString()));
     }
 
     public void btnBrowse_Click(View v) {
@@ -160,94 +103,28 @@ public class UserPageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            imgUri = data.getData();
-            try {
-                Bitmap bm = MediaStore.Images.Media.getBitmap(getContentResolver(), imgUri);
-                imageView.setImageBitmap(bm);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            userPageViewModel.setImgUri(data.getData());
         }
     }
 
-    public String getImageExt(Uri uri) {
-        ContentResolver contentResolver = getContentResolver();
-        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
-    }
-
-    private String md5(String in) {
-        String result = null;
-        try {
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.reset();
-            digest.update(in.getBytes());
-            BigInteger bigInt = new BigInteger(1, digest.digest());
-            result = bigInt.toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     public void btnUpload_Click(View v) {
-        if (imgUri != null) {
-            ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setTitle(getString(R.string.Uploading_Image));
-            dialog.show();
-
-            StorageReference ref = reference.child(STORAGE_PATH + System.currentTimeMillis() + "." + getImageExt(imgUri));
-            ref.putFile(imgUri).addOnSuccessListener(taskSnapshot -> {
-                dialog.dismiss();
-                Toast.makeText(getApplicationContext(), getString(R.string.Image_uploaded), Toast.LENGTH_SHORT).show();
-                Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().addOnSuccessListener(uri -> {
-                    Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put("Image", uri.toString());
-                    myRef.updateChildren(childUpdates);
-                });
-
-            })
-                    .addOnFailureListener(e -> {
-                        dialog.dismiss();
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnProgressListener(snapshot -> {
-                        double progress = (100 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
-                        dialog.setMessage("Uploaded" + (int) progress + "%");
-                    });
-        } else {
-            Toast.makeText(getApplicationContext(), getString(R.string.Select_image), Toast.LENGTH_SHORT).show();
-        }
+        progressDialog.setTitle(getString(R.string.Uploading_Image));
+        progressDialog.show();
+        userPageViewModel.uploadImage();
     }
 
+    @SuppressLint("NonConstantResourceId")
     public void onRadioButtonClicked(View view) {
-        boolean checked = ((RadioButton) view).isChecked();
-
         switch (view.getId()) {
             case R.id.GravatarButton:
-                if (checked) {
-                    findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
-                    findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
-                    String hash = md5(Objects.requireNonNull(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getEmail()));
-                    String gravatarUrl = "https://s.gravatar.com/avatar/" + hash + "?s=80";
-                    Picasso.with(getApplicationContext())
-                            .load(gravatarUrl)
-                            .into(imageView);
-                    myRef.child("Image").setValue(gravatarUrl);
-                    myRef.child("Gravatar").setValue(true);
-                }
+                findViewById(R.id.ChooseImage).setVisibility(View.INVISIBLE);
+                findViewById(R.id.UpdateImage).setVisibility(View.INVISIBLE);
+                userPageViewModel.changeButton(true);
                 break;
             case R.id.FireBaseButton:
-                if (checked) {
-                    findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
-                    findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
-                    Picasso.with(getApplicationContext())
-                            .load(image)
-                            .into(imageView);
-                    myRef.child("Gravatar").setValue(false);
-                    myRef.child("Image").setValue("https://firebasestorage.googleapis.com/v0/b/playgamekl.appspot.com/o/image%2F1606652344403.png?alt=media&token=e5c51ce4-3939-490e-9d4f-fc5ddeef127e");
-                }
+                findViewById(R.id.ChooseImage).setVisibility(View.VISIBLE);
+                findViewById(R.id.UpdateImage).setVisibility(View.VISIBLE);
+                userPageViewModel.changeButton(false);
                 break;
         }
     }

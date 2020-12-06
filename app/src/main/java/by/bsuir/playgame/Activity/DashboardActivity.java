@@ -11,26 +11,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import androidx.lifecycle.ViewModelProviders;
 
 import by.bsuir.playgame.R;
+import by.bsuir.playgame.ViewModel.DashboardViewModel;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private static final int REQUEST_HOST = 103;
-    private static final int REQUEST_GUEST = 104;
-
+    public static final int REQUEST_HOST = 103;
+    public static final int REQUEST_GUEST = 104;
     public static final int MAX_SHIP_COUNT = 10;
+
     public static final String PARAM_MENU_USER_PAGE = "User Page";
     public static final String PARAM_MENU_USER_STATISTIC = "User Statistic";
     public static final String PARAM_INTENT_NAME_OF_ROOM = "roomName";
@@ -38,24 +29,23 @@ public class DashboardActivity extends AppCompatActivity {
     public static final String TYPE_VIEWMODEL_PLACEMENT = "Placement";
     public static final String TYPE_VIEWMODEL_BATTLE = "BattleView";
 
-    private FirebaseAuth firebaseAuth;
-    private FirebaseDatabase database;
-    private DatabaseReference myRef;
     private EditText textView;
-    private String key;
+    private DashboardViewModel dashboardViewModel;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dashboard);
+        dashboardViewModel = ViewModelProviders.of(this).get(DashboardViewModel.class);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance();
+        dashboardViewModel.getOutputMessage().observe(this, text -> Toast.makeText(DashboardActivity.this, text, Toast.LENGTH_SHORT).show());
+        dashboardViewModel.getMoveToRoom().observe(this, text -> moveToRoom(Integer.parseInt(text.get("role").toString()), text.get("name").toString()));
         textView = findViewById(R.id.room);
 
         findViewById(R.id.logout).setOnClickListener(this::onLogOutClick);
-        findViewById(R.id.create).setOnClickListener(this::onCreateClick);
-        findViewById(R.id.connect).setOnClickListener(this::onConnectClick);
+        findViewById(R.id.create).setOnClickListener(v -> dashboardViewModel.createRoom(textView.getText().toString()));
+        findViewById(R.id.connect).setOnClickListener(v -> dashboardViewModel.connectToRoom(textView.getText().toString()));
     }
 
 
@@ -82,7 +72,7 @@ public class DashboardActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void moveToRoom(int index) {
+    public void moveToRoom(int index, String key) {
         Intent intent = new Intent(DashboardActivity.this, PlacementRoomActivity.class);
         intent.putExtra(PARAM_INTENT_NAME_OF_ROOM, key);
         intent.putExtra(PARAM_INTENT_TYPE_VIEWMODEL, TYPE_VIEWMODEL_PLACEMENT);
@@ -97,7 +87,7 @@ public class DashboardActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQUEST_GUEST) {
             if (resultCode == 0) {
-                database.getReference("rooms/").child(key).removeValue();
+                dashboardViewModel.removeRoom();
                 Toast.makeText(DashboardActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
             }
         } else {
@@ -106,60 +96,9 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void onLogOutClick(View v) {
-        FirebaseAuth.getInstance().signOut();
+        dashboardViewModel.signOut();
         Intent intent = new Intent(DashboardActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    private void onCreateClick(View v) {
-        String roomName = textView.getText().toString();
-        if (roomName.isEmpty()) {
-            Toast.makeText(DashboardActivity.this, getString(R.string.Empty_testView), Toast.LENGTH_LONG).show();
-            return;
-        }
-        key = database.getReference().child("rooms").push().getKey();
-        myRef = database.getReference().child("rooms");
-
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", roomName);
-
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/rooms/" + key, values);
-        database.getReference().updateChildren(childUpdates);
-
-        values = new HashMap<>();
-        values.put("user", Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-        values.put("ship", MAX_SHIP_COUNT);
-
-        childUpdates = new HashMap<>();
-        childUpdates.put("/rooms/" + key + "/p1", values);
-        database.getReference().updateChildren(childUpdates);
-        moveToRoom(REQUEST_HOST);
-    }
-
-    private void onConnectClick(View v) {
-        key = textView.getText().toString();
-        if (key.isEmpty()) {
-            Toast.makeText(DashboardActivity.this, getString(R.string.Room_doesn_t_exist), Toast.LENGTH_LONG).show();
-            return;
-        }
-        myRef = database.getReference("rooms/").child(key);
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    myRef.child("/p2").child("user").setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-                    myRef.child("/p2").child("ship").setValue(MAX_SHIP_COUNT);
-                    moveToRoom(REQUEST_GUEST);
-                } else {
-                    Toast.makeText(DashboardActivity.this, getString(R.string.Room_doesn_t_exist), Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
     }
 }

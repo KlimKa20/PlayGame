@@ -6,30 +6,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.Objects;
 
-import by.bsuir.playgame.Enum.TypeField;
 import by.bsuir.playgame.R;
 import by.bsuir.playgame.ViewModel.ButtleViewModel;
 import by.bsuir.playgame.ViewModel.DisplayViewModel;
-
-import static by.bsuir.playgame.Enum.StatusGame.FINISH_GUEST;
-import static by.bsuir.playgame.Enum.StatusGame.FINISH_HOST;
-import static by.bsuir.playgame.Enum.StatusGame.GUEST;
-import static by.bsuir.playgame.Enum.StatusGame.HOST;
 
 public class RoomActivity extends AppCompatActivity {
 
@@ -37,15 +22,10 @@ public class RoomActivity extends AppCompatActivity {
     View fieldFragment1, fieldFragment2;
     TextView textView;
     String roomName;
-    String role = "";
+
     ButtleViewModel buttleViewModel;
     DisplayViewModel displayViewModel;
-    private FirebaseDatabase database;
-    private FirebaseAuth firebaseAuth;
-    private DatabaseReference messageRef, myRef, displayRef, buttleRef, restRef, staticticRef;
 
-    int RestShip;
-    boolean available = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,8 +36,6 @@ public class RoomActivity extends AppCompatActivity {
         Intent postIntent = getIntent();
         roomName = postIntent.getStringExtra(DashboardActivity.PARAM_INTENT_NAME_OF_ROOM);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance();
         buttleViewModel = ViewModelProviders.of(this).get(ButtleViewModel.class);
         displayViewModel = ViewModelProviders.of(this).get(DisplayViewModel.class);
 
@@ -65,234 +43,28 @@ public class RoomActivity extends AppCompatActivity {
         fieldFragment1 = findViewById(R.id.fragment1);
         fieldFragment2 = findViewById(R.id.fragment2);
 
-        myRef = database.getReference("rooms/" + roomName).child("p1").child("user");
+        buttleViewModel.Init(roomName);
+        displayViewModel.Init(roomName);
 
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid())) {
-                    role = "host";
-                    displayRef = database.getReference("rooms/" + roomName).child("p1").child("Field");
-                    buttleRef = database.getReference("rooms/" + roomName).child("p2").child("Field");
-                    restRef = database.getReference("rooms/" + roomName).child("p1").child("ship");
-                    staticticRef = database.getReference("statistic/" + roomName).child("p1");
-                } else {
-                    displayRef = database.getReference("rooms/" + roomName).child("p2").child("Field");
-                    buttleRef = database.getReference("rooms/" + roomName).child("p1").child("Field");
-                    restRef = database.getReference("rooms/" + roomName).child("p2").child("ship");
-                    staticticRef = database.getReference("statistic/" + roomName).child("p2");
-                    role = "guest";
-                }
-                messageRef = database.getReference("rooms/" + roomName + "/message");
-                messageRef.setValue(role);
-                readDisplayEventListener();
-                addButtleEventListener();
-                addDisplayEventListener();
-                addRoomEventListener();
-                addListenerOfFinish();
-                addWriterNameOfRoom();
-                textView.setText(R.string.Opponent_move);
-            }
+        buttleViewModel.getInformation().observe(this, text -> textView.setText(text));
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
+        buttleViewModel.getFinish().observe(this, text -> {
+            Toast.makeText(RoomActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
+            setResult(RESULT_OK);
+            finish();
         });
 
+        buttleViewModel.getToast().observe(this, text -> Toast.makeText(RoomActivity.this, text, Toast.LENGTH_LONG).show());
 
-        buttleViewModel.getShutElement().observe(this, s -> {
-            if (available) {
-                buttleRef.child(String.valueOf(Integer.parseInt(s))).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == TypeField.EMPTY.getCodeField()) {
-                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(TypeField.LOSE.getCodeField());
-                            messageRef.setValue(role);
-                            available = false;
-                            textView.setText(R.string.Opponent_move);
-                        } else if (Integer.parseInt(snapshot.getValue().toString()) == TypeField.HURT.getCodeField()) {
-                            buttleRef.child(String.valueOf(Integer.parseInt(s))).setValue(TypeField.HURT.getCodeField());
-                        } else {
-                            Toast.makeText(RoomActivity.this, getString(R.string.Chose_other_field), Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-            }
+        displayViewModel.getFinish().observe(this, text -> {
+            textView.setText(getString(R.string.You_lose));
+            Toast.makeText(RoomActivity.this, getString(R.string.You_lose), Toast.LENGTH_LONG).show();
+            setResult(RESULT_OK);
+            finish();
         });
-        displayViewModel.getDestoy().observe(this, stringObjectMap -> {
-            displayRef.updateChildren(stringObjectMap);
-            restRef.setValue(--RestShip);
-        });
-    }
 
-    private void addWriterNameOfRoom() {
-        database.getReference("rooms/" + roomName + "/name").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                database.getReference("statistic/" + roomName + "/name").setValue(Objects.requireNonNull(snapshot.getValue()).toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        displayViewModel.getRestShip().observe(this, value -> buttleViewModel.setRestShip(value));
 
     }
 
-    private void addListenerOfFinish() {
-        restRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                RestShip = Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        restRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()) == 0) {
-                    Toast.makeText(RoomActivity.this, getString(R.string.You_lose), Toast.LENGTH_LONG).show();
-                    messageRef.setValue("Finish " + role);
-                    available = false;
-                    textView.setText(getString(R.string.You_lose));
-                    createStatistic(PlacementRoomActivity.REST_SHIPS);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-
-    private void readDisplayEventListener() {
-        displayRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int[] temp = new int[100];
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    temp[Integer.parseInt(Objects.requireNonNull(child.getKey()))] = Integer.parseInt(Objects.requireNonNull(child.getValue()).toString());
-                }
-                displayViewModel.setIcon(temp);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-    }
-
-    private void addDisplayEventListener() {
-        displayRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                displayViewModel.setIconId(Integer.parseInt(Objects.requireNonNull(snapshot.getKey())), Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()));
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void addButtleEventListener() {
-        buttleRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                buttleViewModel.setIconId(Integer.parseInt(Objects.requireNonNull(snapshot.getKey())), Integer.parseInt(Objects.requireNonNull(snapshot.getValue()).toString()));
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void addRoomEventListener() {
-        messageRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (role.equals("host")) {
-                    if (Objects.equals(snapshot.getValue(String.class), GUEST.getName())) {
-                        available = true;
-                        textView.setText(R.string.your_move);
-                    } else if (Objects.equals(snapshot.getValue(String.class), FINISH_GUEST.getName())) {
-                        Toast.makeText(RoomActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
-                        available = false;
-                        textView.setText(getString(R.string.you_win));
-                        createStatistic(RestShip);
-                    }
-                } else {
-                    if (Objects.equals(snapshot.getValue(String.class), HOST.getName())) {
-                        available = true;
-                        textView.setText(R.string.your_move);
-                    } else if (Objects.equals(snapshot.getValue(String.class), FINISH_HOST.getName())) {
-                        Toast.makeText(RoomActivity.this, getString(R.string.you_win), Toast.LENGTH_LONG).show();
-                        available = false;
-                        textView.setText(getString(R.string.you_win));
-                        createStatistic(RestShip);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void createStatistic(int count) {
-        staticticRef.child("name").setValue(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid());
-        staticticRef.child("ship").setValue(count);
-        setResult(RESULT_OK);
-        finish();
-
-    }
 }

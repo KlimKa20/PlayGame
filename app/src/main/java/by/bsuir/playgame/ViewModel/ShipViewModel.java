@@ -7,25 +7,45 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
-import by.bsuir.playgame.Interfece.IFieldViewModel;
-import by.bsuir.playgame.R;
 import by.bsuir.playgame.Enum.ShipType;
 import by.bsuir.playgame.Enum.TypeField;
+import by.bsuir.playgame.Interfece.IFieldViewModel;
+import by.bsuir.playgame.Model.ModelFirebaseAuth;
+import by.bsuir.playgame.Model.ModelFirebaseDatabase;
+import by.bsuir.playgame.R;
+
+import static by.bsuir.playgame.Enum.StatusGame.PLACEMENT_START;
+import static by.bsuir.playgame.Enum.StatusGame.START_GAME;
+import static by.bsuir.playgame.Enum.StatusGame.WAITING_SECOND_PLAYER;
 
 public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
     private final MutableLiveData<Integer> countPoint = new MutableLiveData<>();
     private final MutableLiveData<Integer> resultOfSetting = new MutableLiveData<>();
     private final MutableLiveData<int[]> iconId = new MutableLiveData<>();
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final MutableLiveData<String> showDialog = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> startGame = new MutableLiveData<>();
 
     boolean deleter = false;
     String tempPoints = "";
+    String connectionString = "";
+    String roomName = "";
 
+    ModelFirebaseAuth firebaseAuth;
+    ModelFirebaseDatabase firebaseDatabase;
 
     public ShipViewModel(@NonNull Application application) {
         super(application);
+        firebaseAuth = new ModelFirebaseAuth();
+        firebaseDatabase = new ModelFirebaseDatabase();
         int[] temperIconId = new int[100];
         for (int i = 0; i < 10; i++)
             for (int j = 0; j < 10; j++) {
@@ -40,6 +60,103 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
 
     public void deleteShip() {
         deleter = true;
+    }
+
+    public LiveData<Integer> getResultOfSetShip() {
+        return resultOfSetting;
+    }
+
+    public LiveData<String> getShowDialog() {
+        return showDialog;
+    }
+
+    public LiveData<Boolean> getStartGame() {
+        return startGame;
+    }
+
+    public LiveData<String> getError() {
+        return error;
+    }
+
+    public LiveData<int[]> getIcon() {
+
+        return iconId;
+    }
+
+    public void initPage(String roomName) {
+        this.roomName = roomName;
+        firebaseDatabase.getRef("rooms/" + roomName + "/p1" + "/user").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String message;
+                if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals(firebaseAuth.getUIDUser())) {
+                    connectionString = "/rooms/" + roomName + "/p1" + "/Field";
+                    showDialog.setValue(getApplication().getString(R.string.Waiting_request) + getApplication().getString(R.string.Id_room) + roomName);
+                    message = WAITING_SECOND_PLAYER.getName();
+                } else {
+                    message = PLACEMENT_START.getName();
+                    connectionString = "/rooms/" + roomName + "/p2" + "/Field";
+                }
+                firebaseDatabase.setValue("rooms/" + roomName + "/message", message);
+                addRoomEventListener();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private void addRoomEventListener() {
+        firebaseDatabase.getRef("rooms/" + roomName + "/message").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (Objects.requireNonNull(snapshot.getValue(String.class)).equals(PLACEMENT_START.getName())) {
+                    startGame.setValue(false);
+                } else if (Objects.requireNonNull(snapshot.getValue(String.class)).equals(START_GAME.getName())) {
+                    firebaseDatabase.getRef("rooms/" + roomName + "/message").removeEventListener(this);
+                    startGame.setValue(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
+    public void buttle() {
+        firebaseDatabase.getRef("rooms/" + roomName + "/message").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String message;
+                if (Objects.requireNonNull(dataSnapshot.getValue()).toString().equals(PLACEMENT_START.getName())) {
+                    showDialog.setValue(getApplication().getString(R.string.Waiting_request));
+                    message = WAITING_SECOND_PLAYER.getName();
+                } else {
+                    message = START_GAME.getName();
+                }
+                firebaseDatabase.setValue("rooms/" + roomName + "/message", message);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void changeIconDB(int[] s) {
+        if (connectionString != null) {
+            Map<String, Object> values = new HashMap<>();
+            for (int i = 0; i < s.length; i++)
+                if (s[i] == TypeField.EMPTY.getCodeImage()) {
+                    values.put(String.valueOf(i), TypeField.EMPTY.getCodeField());
+                } else {
+                    values.put(String.valueOf(i), TypeField.SHIP.getCodeField());
+                }
+            firebaseDatabase.updateChild(connectionString, values);
+        }
     }
 
     public void setPoint(String point) {
@@ -60,20 +177,6 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
             deleter = false;
         }
     }
-
-
-    public LiveData<Integer> getResultOfSetShip() {
-        return resultOfSetting;
-    }
-
-    public LiveData<String> getError() {
-        return error;
-    }
-
-    public LiveData<int[]> getIcon() {
-        return iconId;
-    }
-
 
     private void SetShip(String value, int sizeShip) {
         int[] temperIconId = iconId.getValue();
@@ -107,6 +210,7 @@ public class ShipViewModel extends AndroidViewModel implements IFieldViewModel {
             resultOfSetting.setValue(sizeShip);
         }
         iconId.setValue(temperIconId);
+        changeIconDB(temperIconId);
     }
 
 
