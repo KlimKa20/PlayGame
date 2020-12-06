@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Activity.UserPageActivity" >
+
+    <EditText
+        android:id="@+id/NameUser"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/rectangular_field"
+        android:inputType="text"
+        android:paddingVertical="15dp"
+        android:paddingLeft="60dp"
+        android:textColor="#000000" />
+
+    <Button
+        android:id="@+id/ApplyName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Name" />
+
+    <RadioGroup
+        android:id="@+id/RadioButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/GravatarButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gravatar"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton
+            android:id="@+id/FireBaseButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FireStore"
+            android:onClick="onRadioButtonClicked"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/ChooseImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse image to upload"
+        android:onClick="btnBrowse_Click"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"/>
+
+
+    <Button
+        android:id="@+id/UpdateImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Image"
+        android:onClick="btnUpload_Click"/>
+
+</LinearLayout>
