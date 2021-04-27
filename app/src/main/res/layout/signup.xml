@@ -7,17 +7,16 @@
     android:gravity="center"
     android:orientation="vertical"
     android:paddingHorizontal="30dp"
-    android:background="#1E88E5"
-    tools:context=".Activity.MainActivity">
+    android:background="#1E88E5">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_in"
+        android:text="@string/sign_up"
         android:textColor="#ffffff"
         android:textStyle="bold"
         android:textSize="40sp"
-         />
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,7 +25,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/Email"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"
@@ -54,7 +53,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/Password"
+            android:id="@+id/Password1"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"
@@ -74,11 +73,38 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/Password2"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="@drawable/rectangular_field"
+            android:hint="@string/confirm_your_password"
+            android:inputType="textPassword"
+            android:paddingVertical="15dp"
+            android:paddingLeft="60dp"
+            android:textColor="#000000" />
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="10dp"
+            android:background="@android:drawable/ic_lock_idle_lock" />
+
+    </RelativeLayout>
+
     <Button
-        android:id="@+id/login"
+        android:id="@+id/register"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="@string/sign_in"
+        android:text="@string/sign_up"
         android:textColor="#ffffff"
         android:layout_marginTop="30dp"
         android:background="@drawable/button_back"
@@ -96,14 +122,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/you_haven_t_account"
+            android:text="@string/you_have_account"
             android:textColor="#ffffff"
             android:textSize="18sp"/>
         <TextView
-            android:id="@+id/SignUpTv"
+            android:id="@+id/signInTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sign_up"
+            android:text="@string/sign_in"
             android:layout_marginStart="10dp"
             android:textStyle="bold"
             android:textColor="#ffffff"
